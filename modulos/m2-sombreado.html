@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02 · Sombreado limpio · Forja Mecha</title>
+  <meta name="description" content="Entiende las normales en Blender y elimina las manchas de sombreado del hard surface con Smooth by Angle, Bevel con Harden Normals y Weighted Normal.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m2-sombreado">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 02</div>
+      <h1>Sombreado limpio</h1>
+      <p style="color:var(--muted);max-width:680px">El motivo número uno por el que un modelo hard surface «parece de aficionado» no es la forma: son las <strong>manchas de sombreado</strong>. Aquí entenderás por qué aparecen y cómo eliminarlas para siempre.</p>
+      <div class="meta"><span>~1 hora</span><span>Nivel: inicio</span><span>Proyecto: módulo técnico sin artefactos</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#problema">El problema</a>
+      <a href="#normales">Qué son las normales</a>
+      <a href="#cuatro">Los 4 sombreados</a>
+      <a href="#visor">Compáralos en 3D</a>
+      <a href="#ngons">N-gons y booleanos</a>
+      <a href="#receta">La receta</a>
+      <a href="#escala">La trampa de la escala</a>
+      <a href="#revisor">Revisor de Forja</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="problema">
+        <h2>El problema <span class="tag">// diagnóstico</span></h2>
+        <div class="compare">
+          <img src="../assets/img/l2_suave.webp" alt="Bloque con sombreado suave y manchas oscuras">
+          <div class="after"><img src="../assets/img/l2_bevel.webp" alt="Bloque con sombreado limpio"></div>
+          <div class="handle"></div>
+          <span class="lab l">SHADE SMOOTH A SECAS</span><span class="lab r">RECETA HARD SURFACE</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar sombreado">
+        </div>
+        <p>Es la <strong>misma malla</strong>, con los mismos vértices. A la izquierda, alguien pulsó <em>Shade Smooth</em> esperando que quedara «bonito» y salieron manchas y degradados por todas partes. A la derecha, tres ajustes bien hechos. Arrastra el control para compararlas.</p>
+      </section>
+
+      <section id="normales">
+        <h2>Qué son las normales <span class="tag">// concepto</span></h2>
+        <p>Cada cara tiene una <strong>normal</strong>: una flecha invisible que dice hacia dónde «mira». Blender la usa para calcular cuánta luz recibe la cara.</p>
+        <div class="grid c2">
+          <div class="card"><h3>Shade Flat</h3><p>Cada cara usa su propia normal. Se ve facetado, pero las caras planas se ven planas.</p></div>
+          <div class="card"><h3>Shade Smooth</h3><p>Blender <em>promedia</em> las normales en cada vértice y la luz se difumina entre caras. Ideal para curvas, pero en una cara plana grande ese promedio crea degradados donde no debería haberlos.</p></div>
+        </div>
+        <div class="note why"><p><strong>La clave:</strong> en hard surface queremos dos cosas a la vez: <em>caras planas que se vean planas</em> y <em>curvas y bordes que se vean suaves</em>. Toda la receta de este módulo sirve para conseguir las dos.</p></div>
+        <div class="note tip"><p><strong>Comprueba la orientación:</strong> en el menú <em>Overlays</em> activa <strong>Face Orientation</strong>. Azul significa que la cara mira hacia fuera (bien) y rojo que mira hacia dentro (mal). Si ves rojo: modo edición, <kbd>A</kbd> para seleccionar todo y <kbd>Shift</kbd>+<kbd>N</kbd> para recalcular las normales.</p></div>
+      </section>
+
+      <section id="cuatro">
+        <h2>Los 4 sombreados, uno a uno <span class="tag">// comparativa</span></h2>
+        <figure data-tabs>
+          <div class="tabs">
+            <button class="on" data-src="../assets/img/l2_plano.webp" data-cap="<strong>Shade Flat:</strong> correcto para trabajar, pero facetado. Los bordes cortan la luz de golpe y no hay ningún brillo.">1 · Flat</button>
+            <button data-src="../assets/img/l2_suave.webp" data-cap="<strong>Shade Smooth:</strong> desastre. Las normales se promedian entre caras de 90° y aparecen manchas negras alrededor del agujero.">2 · Smooth</button>
+            <button data-src="../assets/img/l2_angulo.webp" data-cap="<strong>Smooth by Angle (30°):</strong> mucho mejor. Las aristas de más de 30° quedan duras, pero sigue habiendo degradados en la cara grande con n-gons y los bordes no brillan.">3 · Smooth by Angle</button>
+            <button data-src="../assets/img/l2_bevel.webp" data-cap="<strong>Bevel (Harden Normals) + Weighted Normal:</strong> caras planas perfectas y bordes redondeados que atrapan la luz. Esta es la receta.">4 · Bevel + WN</button>
+          </div>
+          <img src="../assets/img/l2_plano.webp" alt="Comparativa de sombreados del bloque técnico" loading="lazy">
+          <figcaption><strong>Shade Flat:</strong> correcto para trabajar, pero facetado. Los bordes cortan la luz de golpe y no hay ningún brillo.</figcaption>
+        </figure>
+        <p>Estas imágenes usan un <em>MatCap</em>, una iluminación de estudio falsa que exagera los defectos. En Blender lo activas con <kbd>Z</kbd> → Solid y, en el menú <em>Shading</em> del visor, <strong>Lighting: MatCap</strong>. Es la mejor forma de cazar manchas mientras modelas.</p>
+      </section>
+
+      <section id="visor">
+        <h2>Compáralos en 3D <span class="tag">// visor</span></h2>
+        <p>Gira el bloque y fíjate cómo se mueven los reflejos. Los defectos de sombreado se ven mucho más en movimiento.</p>
+        <forja-visor
+          data-modelos="modulo_plano,modulo_suave,modulo_angulo,modulo_bevel"
+          data-etiquetas="Flat|Smooth|By Angle|Bevel + WN"
+          data-malla="off"
+          data-notas="Flat: facetado pero honesto.|Smooth: gira el modelo y mira el frontal y el agujero.|Smooth by Angle: aristas duras, pero sin brillo en los bordes.|La receta: reflejos limpios en las caras y brillo en cada borde."></forja-visor>
+      </section>
+
+      <section id="ngons">
+        <h2>N-gons y booleanos <span class="tag">// concepto</span></h2>
+        <figure>
+          <img src="../assets/img/l2_ngons.webp" alt="Malla del bloque mostrando el n-gon frontal generado por el booleano" loading="lazy">
+          <figcaption>Tras aplicar el booleano, la cara frontal es un único n-gon (un polígono de muchos lados) y las diagonales que ves son las que Blender usa para triangularlo.</figcaption>
+        </figure>
+        <p>Un <strong>n-gon</strong> es una cara de más de 4 lados. Los booleanos los generan siempre. ¿Son malos? Depende del flujo de trabajo:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Situación</th><th>¿N-gons?</th></tr>
+            <tr><td>Cara <strong>plana</strong> + Bevel + Weighted Normal</td><td style="color:var(--green)">✔ Aceptables. Es el flujo «low poly + bevel» que usan muchos profesionales.</td></tr>
+            <tr><td>Superficie <strong>curva</strong></td><td style="color:var(--amber)">⚠ Evítalos: el sombreado se ondula.</td></tr>
+            <tr><td>Con <strong>Subdivision Surface</strong></td><td style="color:var(--red)">✘ Problema seguro: pellizcos y bultos. Lo veremos en el módulo 4.</td></tr>
+            <tr><td>Para animar o deformar</td><td style="color:var(--red)">✘ Mejor quads.</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="receta">
+        <h2>La receta hard surface <span class="tag">// memorízala</span></h2>
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Shade Smooth</h3></div>
+          <p>En modo objeto: clic derecho → <strong>Shade Smooth</strong>. (Sí, se verá mal durante unos segundos.)</p>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Modificador Bevel</h3></div>
+          <ul>
+            <li><strong>Amount</strong>: pequeño, entre 0.01 y 0.03 en piezas de un metro.</li>
+            <li><strong>Segments</strong>: 2–3. Con 1 se ve un chaflán, con 3 un borde redondeado.</li>
+            <li><strong>Limit Method: Angle</strong> (30°): solo bisela las aristas «duras».</li>
+            <li><em>Shading</em> → <strong>Harden Normals</strong> ✓: la clave. Hace que las caras planas apunten recto aunque estén rodeadas de biseles.</li>
+          </ul>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Modificador Weighted Normal</h3></div>
+          <p>Add Modifier → Normals → <strong>Weighted Normal</strong>, con <strong>Keep Sharp</strong> ✓. Da más peso a las caras grandes, así que las caras planas mandan y los bordes pequeños se adaptan. Va <strong>siempre debajo</strong> del Bevel.</p>
+          <figure><img src="../assets/img/l2_bevel_wire.webp" alt="Malla con el bisel aplicado mostrando los segmentos en los bordes" loading="lazy">
+            <figcaption>Así queda la malla con los modificadores. Los bordes llevan 3 segmentos y las caras grandes siguen siendo n-gons, y aun así el sombreado es perfecto.</figcaption></figure>
+        </div>
+        <figure>
+          <img src="../assets/img/l2_bevel_vs.webp" alt="Cubo sin bevel frente a cubo con bevel brillando en los bordes" loading="lazy">
+          <figcaption>Mismo cubo, misma luz. El de la derecha tiene un Bevel de 0.05 con 3 segmentos: el borde atrapa la luz y la pieza se lee como un objeto real.</figcaption>
+        </figure>
+        <div class="note tip"><p><strong>Control fino:</strong> si quieres que una arista concreta quede dura (o se bisele) aunque no cumpla el ángulo, selecciónala en modo edición y usa <kbd>Ctrl</kbd>+<kbd>E</kbd> → <strong>Mark Sharp</strong>. También puedes cambiar el Limit Method del Bevel a <strong>Weight</strong> y dar peso solo a las aristas que quieras biselar, desde el panel <kbd>N</kbd> → Item → <em>Bevel Weight</em>.</p></div>
+      </section>
+
+      <section id="escala">
+        <h2>La trampa de la escala <span class="tag">// error típico</span></h2>
+        <figure>
+          <img src="../assets/img/l2_escala.webp" alt="Dos bloques con el mismo bevel: el izquierdo deformado por escala sin aplicar" loading="lazy">
+          <figcaption>Izquierda: escala (2.2, 0.8, 0.8) sin aplicar, con el bisel estirado y desigual. Derecha: la misma pieza con la escala aplicada: bisel uniforme.</figcaption>
+        </figure>
+        <p>Cuando escalas en <strong>modo objeto</strong>, Blender no cambia la malla: guarda un multiplicador. Los modificadores trabajan sobre la malla original y después se estiran. Resultado: biseles ovalados, grosores desiguales y booleanos raros.</p>
+        <div class="note warn"><p><strong>Hábito obligatorio:</strong> antes de añadir modificadores, <kbd>Ctrl</kbd>+<kbd>A</kbd> → <strong>Scale</strong>. Si la escala del panel <kbd>N</kbd> no pone 1, 1, 1, todavía no has terminado. Y nunca hagas espejos con escala negativa (<kbd>S</kbd> <kbd>X</kbd> <code>-1</code>) en modo objeto: invierte las normales. Para eso está el modificador <strong>Mirror</strong>.</p></div>
+      </section>
+
+      <section id="revisor">
+        <h2>Revisor de Forja <span class="tag">// script gratuito</span></h2>
+        <p>Un script de Python hecho para esta web. Lo ejecutas dentro de Blender, revisa los objetos seleccionados y te dice qué arreglar: escala sin aplicar, escala negativa, modificadores en mal orden, Bevel sin límite, n-gons problemáticos, agujeros, vértices sueltos o duplicados… <strong>No modifica nada</strong>, solo informa.</p>
+        <ol>
+          <li>Selecciona tus objetos en modo objeto.</li>
+          <li>Ve a la pestaña <strong>Scripting</strong> (arriba) → <code>Text → Open</code> y elige <code>revisor_forja.py</code>.</li>
+          <li>Pulsa ▶ <strong>Run Script</strong>. Aparecerá una ventana con el informe.</li>
+        </ol>
+        <div class="dl">
+          <span class="ico">🛠️</span>
+          <div><strong>revisor_forja.py</strong><small>Script de Python para Blender 4.2 o superior. Puedes leer su código: está comentado en castellano.</small></div>
+          <a class="btn small ghost" href="../assets/scripts/revisor_forja.py" download>Descargar</a>
+        </div>
+        <div class="dl">
+          <span class="ico">📦</span>
+          <div><strong>modulo_sombreado.blend</strong><small>Las 4 versiones del bloque para que las examines (actívalas en el Outliner).</small></div>
+          <a class="btn small ghost" href="../assets/blend/modulo_sombreado.blend" download>Descargar</a>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: el bloque técnico <span class="tag">// checklist</span></h2>
+        <p>Construye tú el bloque de este módulo y arregla su sombreado. Es la primera vez que usarás un booleano:</p>
+        <ol>
+          <li>Cubo → <kbd>S</kbd> para darle proporciones de caja vertical → <kbd>Ctrl</kbd>+<kbd>A</kbd> Scale.</li>
+          <li>Modo edición, aristas: selecciona la arista superior delantera y <kbd>Ctrl</kbd>+<kbd>B</kbd> con <strong>1 segmento</strong> para hacer un chaflán grande.</li>
+          <li>Modo objeto: añade un cilindro que atraviese el frontal. Selecciona primero el cilindro y luego, con <kbd>Shift</kbd>, el bloque, y pulsa <kbd>Ctrl</kbd>+<kbd>Num −</kbd> (Bool Tool → Auto Difference). Si no tienes Bool Tool, usa el modificador <strong>Boolean</strong> → Difference en el bloque, elige el cilindro y aplícalo.</li>
+          <li>Haz lo mismo con un cubo estrecho para la ranura.</li>
+          <li>Prueba los 4 sombreados y quédate con la receta.</li>
+        </ol>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="normales"><span>Sé explicar qué es una normal y por qué Shade Smooth mancha las caras planas</span></label></li>
+          <li><label><input type="checkbox" data-id="orientation"><span>He usado Face Orientation y <kbd>Shift</kbd>+<kbd>N</kbd></span></label></li>
+          <li><label><input type="checkbox" data-id="booleano"><span>Bloque modelado con chaflán y dos cortes booleanos</span></label></li>
+          <li><label><input type="checkbox" data-id="matcap"><span>He cazado manchas con MatCap en el visor</span></label></li>
+          <li><label><input type="checkbox" data-id="receta"><span>Receta aplicada: Shade Smooth + Bevel (Angle, Harden Normals) + Weighted Normal</span></label></li>
+          <li><label><input type="checkbox" data-id="escala"><span>Escala aplicada (1, 1, 1) antes de los modificadores</span></label></li>
+          <li><label><input type="checkbox" data-id="revisor"><span>El Revisor de Forja no encuentra problemas en mi bloque ni en mi celda</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>00 · Preparar el hangar · Forja Mecha</title>
+  <meta name="description" content="Instala Blender, activa los addons gratuitos para hard surface, aprende a moverte por la escena y monta tu estudio de render.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+</head>
+<body data-modulo="m0-preparacion">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 00</div>
+      <h1>Preparar el hangar</h1>
+      <p style="color:var(--muted);max-width:680px">Antes de forjar nada, dejamos el taller listo: Blender instalado y bien configurado, los addons gratuitos activados, soltura moviéndote por la escena y tu propio estudio de render, como el de las imágenes de referencia.</p>
+      <div class="meta"><span>~1 hora</span><span>Nivel: inicio</span><span>Proyecto: estudio gris de render</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#que-es">Qué es hard surface</a>
+      <a href="#instalar">Instalar Blender</a>
+      <a href="#config">Configuración</a>
+      <a href="#addons">Addons gratuitos</a>
+      <a href="#navegar">Moverte por la escena</a>
+      <a href="#estudio">Tu estudio de render</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="que-es">
+        <h2>Qué es hard surface <span class="tag">// concepto</span></h2>
+        <p>«Hard surface» es el modelado de <strong>objetos duros y fabricados</strong>: robots, armas, vehículos o maquinaria. Al contrario que en el modelado orgánico, que ya conoces, aquí mandan las superficies planas, los cortes limpios, los biseles y una lógica mecánica (las piezas tienen que parecer que encajan y funcionan).</p>
+        <p>Hay dos grandes formas de trabajar, y en la ruta aprenderás las dos:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Flujo</th><th>Cómo funciona</th><th>Ideal para</th></tr>
+            <tr><td><strong>Bevel + Booleanos</strong><br><small style="color:var(--muted)">(«low poly + bevel»)</small></td><td>Formas duras, cortes con booleanos y un modificador <em>Bevel</em> que redondea los bordes. Las normales se arreglan con <em>Weighted Normal</em>.</td><td>Paneles, armas, placas, piezas mecánicas. Es rápido y no destructivo. Módulos 1–3.</td></tr>
+            <tr><td><strong>Subdivisión</strong></td><td>Malla de quads + <em>Subdivision Surface</em>. Los bordes se controlan con <em>support loops</em> (aristas de apoyo).</td><td>Cascos, carcasas curvas y superficies suaves tipo Gundam. Módulo 4.</td></tr>
+          </table>
+        </div>
+        <figure>
+          <img src="../assets/img/l0_estudio.webp" alt="Cubo, cilindro y esfera emisiva en un estudio gris de render" loading="lazy">
+          <figcaption>El estudio que montarás en este módulo. Los bordes del cubo y del cilindro brillan porque llevan un <em>Bevel</em>: en hard surface casi nada tiene aristas perfectamente afiladas.</figcaption>
+        </figure>
+        <div class="note why"><p><strong>Por qué importa:</strong> en la vida real ningún borde es infinitamente afilado. Un bisel minúsculo atrapa la luz y es lo que hace que una pieza «parezca de metal» y no de cartón. Lo verás una y otra vez.</p></div>
+      </section>
+
+      <section id="instalar">
+        <h2>Instalar Blender <span class="tag">// paso 1</span></h2>
+        <ol>
+          <li>Ve a <a href="https://www.blender.org/download/" target="_blank" rel="noopener">blender.org/download</a> y descarga la última versión estable. Es gratis y de código abierto. También está en Steam y en la Microsoft Store, gratis igualmente.</li>
+          <li>Instálala normalmente (o descomprime la versión portable si prefieres no instalar).</li>
+          <li>Ábrela y cierra la ventana de bienvenida.</li>
+        </ol>
+        <div class="note tip"><p><strong>Sobre las versiones:</strong> los renders de esta web se han generado con Blender 4.2 LTS. Todo lo que verás (Extrude, Inset, Bevel, modificadores…) funciona igual en las versiones 4.x y 5.x. Si algún menú cambia de sitio, usa <kbd>F3</kbd>, el buscador de operaciones: escribe el nombre de la herramienta y la encontrarás.</p></div>
+      </section>
+
+      <section id="config">
+        <h2>Configuración recomendada <span class="tag">// paso 2</span></h2>
+        <p>Abre <code>Edit → Preferences</code> y ajusta esto:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Dónde</th><th>Qué</th><th>Por qué</th></tr>
+            <tr><td>Input</td><td><strong>Emulate 3 Button Mouse</strong>, solo si tu ratón no tiene botón central o usas un portátil</td><td>Podrás orbitar con <kbd>Alt</kbd>+clic izquierdo.</td></tr>
+            <tr><td>Input</td><td><strong>Emulate Numpad</strong>, solo si tu teclado no tiene teclado numérico</td><td>Las vistas (frontal, lateral…) pasan a los números de arriba. Ojo: en modo edición esos números cambian el modo de selección, así que si tienes numpad, déjalo desactivado.</td></tr>
+            <tr><td>Interface</td><td><strong>Resolution Scale</strong> a 1.1–1.2 si ves la interfaz pequeña</td><td>Te cansarás menos la vista.</td></tr>
+            <tr><td>Viewport (en la escena)</td><td>Menú <em>Overlays</em> (arriba a la derecha del visor) → <strong>Statistics</strong></td><td>Verás cuántos vértices y caras tiene tu modelo. Muy útil para controlar la malla.</td></tr>
+          </table>
+        </div>
+        <p>Las preferencias se guardan solas (abajo a la izquierda de la ventana puedes comprobar que <em>Auto-Save Preferences</em> está activado).</p>
+      </section>
+
+      <section id="addons">
+        <h2>Addons gratuitos <span class="tag">// paso 3</span></h2>
+        <p>Desde Blender 4.2, los addons oficiales se instalan como <strong>extensiones</strong> con un clic:</p>
+        <ol>
+          <li><code>Edit → Preferences → Get Extensions</code>.</li>
+          <li>Si te lo pide, pulsa <strong>Allow Online Access</strong>.</li>
+          <li>Busca e instala cada uno de estos:</li>
+        </ol>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Extensión</th><th>Para qué la usaremos</th></tr>
+            <tr><td><strong>Bool Tool</strong></td><td>Booleanos (restar, unir, cortar piezas) con atajos de teclado, como <kbd>Ctrl</kbd>+<kbd>Num −</kbd> para restar. Imprescindible en el módulo 3.</td></tr>
+            <tr><td><strong>LoopTools</strong></td><td>Convertir una selección en un <em>círculo perfecto</em> (Circle), repartir vértices (Space) y unir bucles (Bridge).</td></tr>
+            <tr><td><strong>Extra Mesh Objects</strong></td><td>Primitivas extra: engranajes, tornillos, tuberías… perfectas para greebles.</td></tr>
+          </table>
+        </div>
+        <div class="note free">
+          <p><strong>Opcional: MACHIN3tools (gratis).</strong> Su versión gratuita añade menús circulares muy cómodos (modos, sombreado, guardado…). Se descarga desde la web de su autor, <a href="https://machin3.io/MACHIN3tools/" target="_blank" rel="noopener">machin3.io</a>, y se instala con <code>Preferences → Add-ons → ⌄ → Install from Disk</code>. No es imprescindible: aquí todo se puede hacer sin él.</p>
+        </div>
+        <div class="note warn"><p><strong>¿Y HardOps, BoxCutter, DECALmachine…?</strong> Son de pago y muy populares, así que los verás en muchos tutoriales. Hacen más rápido lo mismo que aprenderás aquí con las herramientas de serie: Bevel, Boolean y Weighted Normal. Si entiendes la base, puedes seguir cualquier tutorial sin ellos.</p></div>
+      </section>
+
+      <section id="navegar">
+        <h2>Moverte por la escena <span class="tag">// paso 4</span></h2>
+        <p>Esto tiene que salirte sin pensar. Practica 10 minutos con el cubo por defecto antes de seguir.</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Atajo</th><th>Acción</th></tr>
+            <tr><td><kbd>Botón central</kbd> arrastrar</td><td>Orbitar alrededor de la escena</td></tr>
+            <tr><td><kbd>Shift</kbd>+<kbd>Botón central</kbd></td><td>Desplazar la vista (pan)</td></tr>
+            <tr><td><kbd>Rueda</kbd> / <kbd>Ctrl</kbd>+<kbd>Botón central</kbd></td><td>Zoom</td></tr>
+            <tr><td><kbd>Num .</kbd></td><td>Centrar la vista en lo seleccionado (la que más usarás)</td></tr>
+            <tr><td><kbd>Num 1</kbd> / <kbd>Num 3</kbd> / <kbd>Num 7</kbd></td><td>Vista frontal / lateral / superior (con <kbd>Ctrl</kbd>, la contraria)</td></tr>
+            <tr><td><kbd>Num 5</kbd></td><td>Alternar perspectiva y ortográfica</td></tr>
+            <tr><td><kbd>Num 0</kbd></td><td>Mirar a través de la cámara</td></tr>
+            <tr><td><kbd>º</kbd> (la tecla a la izquierda del 1)</td><td>Menú circular de vistas, útil si no tienes numpad</td></tr>
+            <tr><td><kbd>Num /</kbd></td><td>Vista local: aísla lo seleccionado</td></tr>
+            <tr><td><kbd>Z</kbd></td><td>Menú circular de sombreado (sólido, wireframe, material…)</td></tr>
+            <tr><td><kbd>Alt</kbd>+<kbd>Z</kbd></td><td>Rayos X: ver y seleccionar a través del modelo</td></tr>
+            <tr><td><kbd>F3</kbd></td><td>Buscar cualquier herramienta por su nombre</td></tr>
+          </table>
+        </div>
+        <p>¿Quieres practicarlos jugando? Tienes el <a href="../atajos.html">entrenador de atajos</a>.</p>
+      </section>
+
+      <section id="estudio">
+        <h2>Tu estudio de render <span class="tag">// proyecto</span></h2>
+        <p>Las imágenes que te gustan tienen algo en común: un <strong>fondo gris curvo</strong> (ciclorama) sin horizonte visible y una iluminación de tres puntos. Vamos a montarlo una vez y reutilizarlo en todos los proyectos.</p>
+
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>El suelo que se curva</h3></div>
+          <ol>
+            <li>Borra el cubo por defecto: <kbd>X</kbd> → Delete.</li>
+            <li><kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → <strong>Plane</strong>. Escálalo: <kbd>S</kbd> <code>10</code> <kbd>Enter</kbd>.</li>
+            <li><kbd>Tab</kbd> para entrar en modo edición y <kbd>2</kbd> para seleccionar aristas. Haz clic en la arista del fondo (la más alejada de ti en la vista frontal).</li>
+            <li>Extrúyela hacia arriba: <kbd>E</kbd> <kbd>Z</kbd> <code>8</code> <kbd>Enter</kbd>. Ahora tienes una «L».</li>
+            <li>Selecciona la arista de la esquina de la L y biselala: <kbd>Ctrl</kbd>+<kbd>B</kbd>, mueve el ratón para agrandar el radio y gira la <kbd>Rueda</kbd> hasta tener unos 12 segmentos. Haz clic para confirmar.</li>
+            <li><kbd>Tab</kbd> para salir, clic derecho → <strong>Shade Smooth</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Iluminación de tres puntos</h3></div>
+          <p>Añade tres luces de área con <kbd>Shift</kbd>+<kbd>A</kbd> → Light → <strong>Area</strong>:</p>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Luz</th><th>Posición</th><th>Potencia / tamaño</th><th>Función</th></tr>
+              <tr><td><strong>Principal</strong></td><td>Delante a la izquierda, alta</td><td>~400 W · 3 m</td><td>Define la forma</td></tr>
+              <tr><td><strong>Relleno</strong></td><td>Delante a la derecha, baja</td><td>~80 W · 6 m</td><td>Suaviza las sombras</td></tr>
+              <tr><td><strong>Contraluz</strong></td><td>Detrás, alta, color azulado</td><td>~650 W · 2 m</td><td>Recorta la silueta del fondo: es el «brillo» del borde en tus referencias</td></tr>
+            </table>
+          </div>
+          <p>Para que cada luz apunte al centro: selecciona la luz, luego con <kbd>Shift</kbd> el objeto (o un <em>Empty</em> en el centro), y pulsa <kbd>Ctrl</kbd>+<kbd>T</kbd> → <strong>Track To Constraint</strong>.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Cámara y render</h3></div>
+          <ol>
+            <li>Encuadra la vista como quieras ver la pieza y pulsa <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Num 0</kbd>: la cámara salta a tu vista.</li>
+            <li>En las propiedades de la cámara pon <strong>Focal Length 50 mm</strong>. Las focales largas deforman menos y dan el aspecto de «foto de producto».</li>
+            <li>Render Properties → Render Engine: <strong>EEVEE</strong>, que es rápido. En <em>Color Management</em> deja <strong>AgX</strong>.</li>
+            <li>World Properties → Color: casi negro. La luz la ponen tus lámparas, no el mundo.</li>
+            <li><kbd>F12</kbd> para renderizar. Con <code>Image → Save As</code> guardas la imagen.</li>
+          </ol>
+        </div>
+        <div class="note tip"><p><strong>Truco:</strong> guarda este archivo como <code>estudio_base.blend</code>. En cada proyecto nuevo, ábrelo y haz <code>File → Save As</code> con otro nombre. Así nunca empiezas de cero.</p></div>
+        <div class="dl">
+          <span class="ico">📦</span>
+          <div><strong>estudio_base.blend</strong><small>El estudio de la imagen de arriba, listo para usar o para comparar con el tuyo.</small></div>
+          <a class="btn small ghost" href="../assets/blend/estudio_base.blend" download>Descargar</a>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto del módulo <span class="tag">// checklist</span></h2>
+        <p>Marca cada punto cuando lo tengas. Tu progreso se guarda en este navegador.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="instalar"><span>Blender instalado y configurado (ratón, numpad y estadísticas)</span></label></li>
+          <li><label><input type="checkbox" data-id="addons"><span>Bool Tool, LoopTools y Extra Mesh Objects activados</span></label></li>
+          <li><label><input type="checkbox" data-id="navegar"><span>Orbito, desplazo, hago zoom y centro con <kbd>Num .</kbd> sin pensar</span></label></li>
+          <li><label><input type="checkbox" data-id="ciclorama"><span>Fondo curvo hecho con Extrude + Bevel de arista</span></label></li>
+          <li><label><input type="checkbox" data-id="luces"><span>Tres luces de área apuntando con Track To</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Primer render con <kbd>F12</kbd> guardado como imagen</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+</body>
+</html>

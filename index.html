@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forja Mecha · Hard Surface en Blender</title>
+  <meta name="description" content="Aprende modelado hard surface en Blender paso a paso, solo con herramientas gratuitas: de una celda de energía a un androide completo.">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/forja.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="index.html"><img class="logo-mark" src="assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="#ruta">Ruta</a>
+        <a href="atajos.html">Atajos</a>
+        <a href="modulos/m0-preparacion.html">Empezar</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <img class="bg" src="assets/img/hero_celda.webp" alt="Dos celdas de energía sci-fi con núcleo azul brillante, modeladas en Blender">
+    <div class="content">
+      <div class="wrap">
+        <div class="inner">
+          <div class="eyebrow">Hard surface · Blender · 100% gratis</div>
+          <h1>Forja tus propios mechas</h1>
+          <p class="lead">De un simple cilindro a un androide completo. Aprende hard surface paso a paso, construyendo piezas reales que acabarán formando parte de tus robots y armas.</p>
+          <div class="actions">
+            <a class="btn" href="modulos/m0-preparacion.html">Empezar por el módulo 0</a>
+            <a class="btn ghost" href="#ruta">Ver la ruta completa</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Cómo funciona</div>
+        <h2>Aprendes haciendo piezas, no leyendo teoría</h2>
+        <p>Cada módulo termina con una pieza tuya hecha en Blender. Las piezas pequeñas de hoy son las que reutilizarás en los proyectos grandes: la celda de energía acaba en el mango de la espada, y los paneles acaban en el blindaje del androide.</p>
+      </div>
+      <div class="grid c4">
+        <div class="card chamfer"><div class="num">01 · VER</div><h3>Renders reales</h3><p>Todas las imágenes salen de Blender, paso a paso, con la malla visible para que veas exactamente qué cambia.</p></div>
+        <div class="card chamfer"><div class="num">02 · GIRAR</div><h3>Modelos en 3D</h3><p>Cada paso se puede girar en el navegador. Activa la malla y estudia la topología desde cualquier ángulo.</p></div>
+        <div class="card chamfer"><div class="num">03 · HACER</div><h3>Pasos con atajos</h3><p>Instrucciones exactas con las teclas que pulsar y los valores que escribir. Sin saltos mágicos.</p></div>
+        <div class="card chamfer"><div class="num">04 · RETO</div><h3>Tu propia versión</h3><p>Al final, un reto para variar la pieza con tu diseño y una checklist que guarda tu progreso.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="ruta">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">La ruta</div>
+        <h2>De cero a androide en 10 módulos</h2>
+        <p>Los módulos marcados como <em>En la forja</em> se irán añadiendo a medida que avances. Tu progreso se guarda en este navegador.</p>
+      </div>
+      <div class="roadmap" data-roadmap></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Sin gastar ni un euro</div>
+        <h2>Todo con Blender y herramientas gratuitas</h2>
+        <p>Muchos tutoriales de hard surface usan addons de pago como HardOps, BoxCutter o DECALmachine. Aquí no hacen falta: Blender ya trae casi todo, y lo que falta lo cubren extensiones gratuitas. Hacerlo «a mano» además te enseña qué pasa por debajo.</p>
+      </div>
+      <div class="grid c3">
+        <div class="card"><h3>Blender</h3><p>Bevel, Boolean, Mirror, Weighted Normal, Array, Solidify, Asset Browser… La base de todo.</p></div>
+        <div class="card"><h3>Bool Tool</h3><p>Booleanos rápidos con un atajo. Es una extensión oficial y gratuita.</p></div>
+        <div class="card"><h3>LoopTools</h3><p>Convierte selecciones en círculos perfectos, reparte vértices y más. Gratis.</p></div>
+        <div class="card"><h3>MACHIN3tools</h3><p>Su versión gratuita incluye menús circulares muy cómodos para hard surface.</p></div>
+        <div class="card"><h3>Extra Mesh Objects</h3><p>Primitivas extra (engranajes, tornillos, tuberías) para hacer greebles.</p></div>
+        <div class="card"><h3>Scripts de Forja</h3><p>Un revisor de malla en Python, hecho para esta web, que detecta los errores típicos.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <span>FORJA<span style="color:var(--red)">//</span>MECHA · Renders generados con Blender 4.2 LTS</span>
+      <span>Proyecto personal de aprendizaje · Blender es software libre de la Blender Foundation</span>
+    </div>
+  </footer>
+  <script type="module" src="assets/js/forja.js"></script>
+</body>
+</html>

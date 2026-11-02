@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>01 · Celda de energía · Forja Mecha</title>
+  <meta name="description" content="Modela una celda de energía sci-fi en Blender con Extrude, Inset, Loop Cut y Bevel, paso a paso.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m1-celda-energia">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 01</div>
+      <h1>Celda de energía</h1>
+      <p style="color:var(--muted);max-width:680px">Tu primera pieza hard surface: la batería con núcleo brillante que más adelante irá en el mango de la espada-arma. Con solo cuatro herramientas (Inset, Extrude, Loop Cut y Bevel) pasarás de un cilindro a una pieza con aspecto industrial.</p>
+      <div class="meta"><span>~1,5 horas</span><span>Nivel: inicio</span><span>Herramientas: I · E · Ctrl+R · Bevel</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#visor">La pieza en 3D</a>
+      <a href="#base">Modo edición</a>
+      <a href="#p1">1 · Cilindro</a>
+      <a href="#p2">2 · Tapas</a>
+      <a href="#p3">3 · Loop Cuts</a>
+      <a href="#p4">4 · Ranuras</a>
+      <a href="#p5">5 · Ventanas</a>
+      <a href="#p6">6 · Acabado</a>
+      <a href="#materiales">Materiales</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l1_final_eevee.webp" alt="Celda de energía terminada con ventanas azules brillantes y anillos rojos" loading="lazy">
+          <figcaption>Resultado final renderizado en EEVEE con el estudio del módulo 0. Fíjate en cómo los bordes biselados atrapan la luz.</figcaption>
+        </figure>
+        <p>Fíjate en la parte trasera del mango del arma de tu referencia: hay una cápsula con un núcleo de energía. Es exactamente esta pieza. Aprenderás:</p>
+        <ul>
+          <li><strong>Inset</strong> (<kbd>I</kbd>): crear un borde dentro de una cara. Es la herramienta reina del hard surface.</li>
+          <li><strong>Extrude</strong> (<kbd>E</kbd>, <kbd>Alt</kbd>+<kbd>E</kbd>): sacar o hundir geometría.</li>
+          <li><strong>Loop Cut</strong> (<kbd>Ctrl</kbd>+<kbd>R</kbd>): añadir cortes donde necesitas detalle.</li>
+          <li><strong>Modificador Bevel</strong> + <strong>Weighted Normal</strong>: el acabado que hace que parezca metal.</li>
+        </ul>
+      </section>
+
+      <section id="visor">
+        <h2>Gírala paso a paso <span class="tag">// 3D</span></h2>
+        <p>Este es el modelo real exportado desde Blender en cada fase. Pulsa los pasos, gíralo y activa <strong>Malla</strong> para ver la topología.</p>
+        <forja-visor
+          data-modelos="celda_01,celda_02,celda_03,celda_04,celda_05,celda_06"
+          data-etiquetas="1 Cilindro|2 Tapas|3 Cortes|4 Ranuras|5 Ventanas|6 Final"
+          data-notas="Cilindro de 16 lados: la base de todo.|Tres Inset seguidos en cada tapa: borde, hueco y terminal.|Seis Loop Cuts marcan dónde irán las ranuras y las ventanas.|Las ranuras se hunden con Extrude Along Normals.|Ventanas: Inset individual, extrusión hacia dentro y borrar la cara.|Bevel + Weighted Normal: los bordes ya atrapan la luz."></forja-visor>
+      </section>
+
+      <section id="base">
+        <h2>Antes de empezar: el modo edición <span class="tag">// concepto</span></h2>
+        <p>Todo el modelado ocurre en <strong>modo edición</strong> (<kbd>Tab</kbd>). Dentro tienes tres modos de selección:</p>
+        <div class="grid c3">
+          <div class="card"><div class="num"><kbd>1</kbd></div><h3>Vértices</h3><p>Puntos. Para ajustes finos de posición.</p></div>
+          <div class="card"><div class="num"><kbd>2</kbd></div><h3>Aristas</h3><p>Líneas. Para biselar bordes y deslizar cortes.</p></div>
+          <div class="card"><div class="num"><kbd>3</kbd></div><h3>Caras</h3><p>Superficies. Para Inset y Extrude: lo que más usarás hoy.</p></div>
+        </div>
+        <div class="note tip"><p><strong>Escribe los números.</strong> Después de pulsar casi cualquier herramienta (<kbd>G</kbd>, <kbd>S</kbd>, <kbd>I</kbd>, <kbd>E</kbd>…) puedes teclear un valor y pulsar <kbd>Enter</kbd>. Es la diferencia entre «más o menos» y una pieza precisa. Si te equivocas, <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</p></div>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>El cilindro base</h3></div>
+          <figure><img src="../assets/img/l1_01_cilindro.webp" alt="Cilindro de 16 lados con la malla visible" loading="lazy"></figure>
+          <ol>
+            <li>Abre tu <code>estudio_base.blend</code> y guárdalo como <code>celda_energia.blend</code>.</li>
+            <li><kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → <strong>Cylinder</strong>.</li>
+            <li>Abajo a la izquierda aparece el panel <em>Add Cylinder</em>. Ábrelo y pon: <strong>Vertices 16</strong>, <strong>Radius 0.5 m</strong> y <strong>Depth 2 m</strong>.</li>
+            <li>Súbelo para que apoye en el suelo: <kbd>G</kbd> <kbd>Z</kbd> <code>1</code> <kbd>Enter</kbd>.</li>
+          </ol>
+          <div class="note why"><p><strong>¿Por qué 16 lados?</strong> Son suficientes para que se lea redondo una vez biselado, y 16 se divide entre 2, 4 y 8. Gracias a eso podremos poner 8 ventanas simétricas. Elegir el número de lados pensando en el detalle que vendrá es un hábito clave en hard surface.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Las tapas: Inset en cadena</h3></div>
+          <figure><img src="../assets/img/l1_02_tapas.webp" alt="Tapa superior con borde, hueco y terminal central" loading="lazy"></figure>
+          <ol>
+            <li><kbd>Tab</kbd> para el modo edición y <kbd>3</kbd> para caras. Haz clic en la tapa de arriba.</li>
+            <li><kbd>I</kbd> <code>0.06</code> <kbd>Enter</kbd>: el borde exterior.</li>
+            <li><kbd>I</kbd> <code>0.06</code> <kbd>Enter</kbd> otra vez y luego <kbd>E</kbd> <code>-0.07</code> <kbd>Enter</kbd>: hundes el centro y queda un hueco.</li>
+            <li><kbd>I</kbd> <code>0.12</code> <kbd>Enter</kbd> y <kbd>E</kbd> <code>0.12</code> <kbd>Enter</kbd>: sale el terminal (el «polo» de la batería).</li>
+            <li>Orbita hacia abajo, selecciona la tapa inferior y repite: <kbd>I</kbd> 0.06, <kbd>I</kbd> 0.06 + <kbd>E</kbd> -0.07 y un último <kbd>I</kbd> 0.12 sin extruir.</li>
+          </ol>
+          <div class="note tip"><p><strong>El patrón Inset → Extrude</strong> es el «hola mundo» del hard surface: un borde, y luego hundir o sacar. Lo usarás para tornillos, botones, rejillas, toberas… Repítelo hasta que sea automático.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Loop Cuts donde irá el detalle</h3></div>
+          <figure><img src="../assets/img/l1_03_loopcuts.webp" alt="Cilindro con seis cortes horizontales" loading="lazy"></figure>
+          <p>Necesitamos 6 cortes horizontales a estas alturas (Z): <code>1.62</code>, <code>1.52</code>, <code>1.42</code>, <code>0.58</code>, <code>0.48</code> y <code>0.38</code>.</p>
+          <ol>
+            <li>Pasa el ratón por encima de una arista <em>vertical</em> del lateral y pulsa <kbd>Ctrl</kbd>+<kbd>R</kbd>: verás una línea amarilla horizontal.</li>
+            <li>Clic izquierdo para crear el corte y luego <strong>clic derecho</strong> para que no se deslice.</li>
+            <li>Pulsa <kbd>N</kbd> para abrir la barra lateral. En la pestaña <em>Item</em>, en <strong>Median → Z</strong> (con <em>Global</em> activado), escribe la altura exacta, por ejemplo <code>1.62</code>.</li>
+            <li>Repite con las otras cinco alturas.</li>
+          </ol>
+          <div class="note why"><p><strong>Por qué así:</strong> los cortes definen dónde puedes poner detalle. Sin ellos, no hay caras que hundir. En hard surface piensas primero dónde va cada corte y después lo cortas.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Ranuras: Extrude a lo largo de las normales</h3></div>
+          <figure><img src="../assets/img/l1_04_ranuras.webp" alt="Dos ranuras hundidas en anillo alrededor del cilindro" loading="lazy"></figure>
+          <ol>
+            <li>Modo caras (<kbd>3</kbd>). Haz <kbd>Alt</kbd>+clic sobre una arista vertical de la franja estrecha de arriba (entre 1.52 y 1.62): se selecciona el anillo completo de caras.</li>
+            <li>Haz <kbd>Shift</kbd>+<kbd>Alt</kbd>+clic en la franja equivalente de abajo (0.38–0.48) para añadirla.</li>
+            <li><kbd>Alt</kbd>+<kbd>E</kbd> → <strong>Extrude Faces Along Normals</strong>, escribe <code>-0.05</code> y <kbd>Enter</kbd>.</li>
+          </ol>
+          <div class="note warn"><p><strong>Error típico:</strong> si usas <kbd>E</kbd> normal en un anillo, Blender extruye todo en una sola dirección y la ranura sale torcida. <em>Along Normals</em> empuja cada cara hacia su propio «dentro». Úsalo siempre en superficies curvas.</p></div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Ventanas al núcleo</h3></div>
+          <figure><img src="../assets/img/l1_05_ventanas.webp" alt="Ocho ventanas rectangulares abiertas con un núcleo azul dentro" loading="lazy"></figure>
+          <ol>
+            <li><kbd>Alt</kbd>+clic en una arista vertical de la franja ancha central para seleccionar sus 16 caras.</li>
+            <li>Menú <code>Select → Checker Deselect</code>: se deselecciona una cara sí y otra no, y te quedan 8.</li>
+            <li><kbd>I</kbd> y otra vez <kbd>I</kbd> (Inset <em>individual</em>, cada cara por separado), <code>0.035</code> <kbd>Enter</kbd>.</li>
+            <li><kbd>Alt</kbd>+<kbd>E</kbd> → <strong>Extrude Individual Faces</strong>, <code>-0.09</code> <kbd>Enter</kbd>: le das grosor a la pared.</li>
+            <li><kbd>X</kbd> → <strong>Faces</strong>: borras el fondo y la ventana queda abierta.</li>
+            <li><kbd>Tab</kbd> para salir. Añade el núcleo: <kbd>Shift</kbd>+<kbd>A</kbd> → Cylinder con <strong>Vertices 24, Radius 0.34, Depth 0.9</strong> y <strong>Location Z 1</strong>.</li>
+          </ol>
+          <div class="note tip"><p><strong>Pulsar <kbd>I</kbd> dos veces</strong> cambia entre Inset de región (un único borde alrededor de todo) e Inset individual (un borde por cara). Verás el modo en la barra superior mientras la herramienta está activa.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Acabado: Bevel + Weighted Normal</h3></div>
+          <div class="compare">
+            <img src="../assets/img/l1_05_ventanas.webp" alt="Celda sin biselar">
+            <div class="after"><img src="../assets/img/l1_06_final.webp" alt="Celda biselada"></div>
+            <div class="handle"></div>
+            <span class="lab l">SIN BEVEL</span><span class="lab r">CON BEVEL</span>
+            <input type="range" min="0" max="100" value="50" aria-label="Comparar sin bevel y con bevel">
+          </div>
+          <ol>
+            <li>En modo objeto, selecciona la celda. Clic derecho → <strong>Shade Smooth</strong>. Al principio se verá raro: lo arreglamos ahora.</li>
+            <li>Propiedades → pestaña <strong>Modifiers</strong> (la llave inglesa) → Add Modifier → Generate → <strong>Bevel</strong>:
+              <ul>
+                <li><strong>Amount</strong> 0.02 m · <strong>Segments</strong> 3</li>
+                <li><strong>Limit Method: Angle</strong> a 30°: solo bisela las aristas marcadas, no las caras curvas.</li>
+                <li>Desplegable <em>Shading</em> → <strong>Harden Normals</strong> ✓</li>
+              </ul>
+            </li>
+            <li>Add Modifier → Normals → <strong>Weighted Normal</strong>, con <strong>Keep Sharp</strong> ✓. Tiene que quedar <em>debajo</em> del Bevel.</li>
+          </ol>
+          <figure><img src="../assets/img/l1_06_final_limpio.webp" alt="Celda biselada sin malla, con sombreado limpio" loading="lazy">
+            <figcaption>Sombreado limpio: caras planas que se ven planas y bordes suaves que brillan. En el módulo 2 entenderás a fondo por qué funciona.</figcaption></figure>
+          <div class="note warn"><p><strong>Comprueba la escala.</strong> Si en algún momento escalaste en modo objeto, pulsa <kbd>Ctrl</kbd>+<kbd>A</kbd> → <strong>Scale</strong> antes de añadir el Bevel. Si no, el bisel sale deformado (lo verás con imágenes en el módulo 2).</p></div>
+        </div>
+      </section>
+
+      <section id="materiales">
+        <h2>Materiales rápidos <span class="tag">// avance</span></h2>
+        <p>Los materiales se ven a fondo en el módulo 8, pero con esto ya tienes el aspecto de la imagen final:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Material</th><th>Ajustes (pestaña Material → New)</th></tr>
+            <tr><td><strong>Blindaje</strong> (la celda)</td><td>Base Color gris claro · <strong>Metallic 0.35</strong> · <strong>Roughness 0.38</strong></td></tr>
+            <tr><td><strong>Núcleo</strong></td><td>Desplegable <em>Emission</em>: Color azul (≈ #1473ff) · <strong>Strength 9</strong></td></tr>
+            <tr><td><strong>Anillos rojos</strong> (opcional)</td><td>Un cilindro abierto y muy fino dentro de cada ranura con Emission roja · Strength 4–6</td></tr>
+          </table>
+        </div>
+        <p>Pulsa <kbd>Z</kbd> → <strong>Rendered</strong> para verlo en vivo y <kbd>F12</kbd> para el render final.</p>
+        <figure><img src="../assets/img/hero_celda.webp" alt="Dos celdas de energía con núcleo azul y anillos rojos" loading="lazy"><figcaption>Con los anillos rojos emisivos y una segunda copia (<kbd>Shift</kbd>+<kbd>D</kbd>) tumbada, ya tienes una escena de portfolio.</figcaption></figure>
+        <div class="dl">
+          <span class="ico">📦</span>
+          <div><strong>celda_energia.blend</strong><small>Contiene los 6 pasos como objetos separados (ocultos en el Outliner) para comparar con tu versión.</small></div>
+          <a class="btn small ghost" href="../assets/blend/celda_energia.blend" download>Descargar</a>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu propia celda <span class="tag">// checklist</span></h2>
+        <p>Ahora hazla <strong>tuya</strong>. Repite la pieza desde cero sin mirar los pasos y cambia al menos dos cosas del diseño. Ideas:</p>
+        <ul>
+          <li>Una celda <strong>hexagonal</strong> (cilindro de 6 lados: muy de mecha).</li>
+          <li>Ventanas en dos filas, o una ventana sí y dos no.</li>
+          <li>Un conector para cable en el terminal (Inset + Extrude en miniatura).</li>
+          <li>Proporciones distintas: corta y gorda, o larga como un tubo de refrigeración.</li>
+        </ul>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="cilindro"><span>Cilindro creado con valores exactos desde el panel <em>Adjust Last Operation</em></span></label></li>
+          <li><label><input type="checkbox" data-id="inset"><span>Tapas hechas con Inset + Extrude tecleando los valores</span></label></li>
+          <li><label><input type="checkbox" data-id="loopcut"><span>Loop Cuts colocados con precisión desde el panel <kbd>N</kbd></span></label></li>
+          <li><label><input type="checkbox" data-id="normals"><span>Ranuras con <em>Extrude Faces Along Normals</em></span></label></li>
+          <li><label><input type="checkbox" data-id="ventanas"><span>Ventanas con Checker Deselect + Inset individual</span></label></li>
+          <li><label><input type="checkbox" data-id="bevel"><span>Bevel (Angle + Harden Normals) + Weighted Normal, en ese orden</span></label></li>
+          <li><label><input type="checkbox" data-id="variante"><span>Mi variante tiene al menos dos cambios de diseño propios</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Render final en mi estudio guardado como imagen</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

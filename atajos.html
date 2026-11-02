@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrenador de atajos · Forja Mecha</title>
+  <meta name="description" content="Practica los atajos de teclado de Blender para hard surface con un minijuego y consulta la chuleta completa.">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/forja.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="index.html"><img class="logo-mark" src="assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="index.html#ruta">Ruta</a>
+        <a href="atajos.html" class="active">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Entrenamiento</div>
+      <h1>Entrenador de atajos</h1>
+      <p style="color:var(--muted);max-width:680px">En hard surface se trabaja con el teclado. Cuanto antes se te queden los atajos, antes dejarás de pelearte con los menús y podrás centrarte en diseñar.</p>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="tabs" id="modo" style="justify-content:center;margin-bottom:18px">
+        <button class="on" data-modo="teclado">⌨ Pulsa el atajo</button>
+        <button data-modo="opciones">☰ Opción múltiple</button>
+      </div>
+      <div class="tabs" id="grupo" style="justify-content:center;margin-bottom:22px"></div>
+      <div class="trainer chamfer">
+        <div class="ctx" id="ctx"></div>
+        <div class="q" id="q"></div>
+        <div id="zona"></div>
+        <div class="feedback" id="fb"></div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn small ghost" id="ver">Mostrar respuesta</button>
+          <button class="btn small" id="sig">Siguiente →</button>
+        </div>
+        <div class="score"><span>Aciertos <b id="ok">0</b></span><span>Fallos <b id="ko">0</b></span><span>Racha <b id="racha">0</b></span></div>
+      </div>
+      <p style="color:var(--muted);font-size:.88rem;text-align:center;margin-top:14px">Algunos atajos (como <kbd>Ctrl</kbd>+<kbd>R</kbd>) también los usa el navegador. Si te recarga la página o no responde, cambia a opción múltiple.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Chuleta</div>
+        <h2>Todos los atajos de la ruta</h2>
+        <p>Valen para la configuración por defecto de Blender 4.x y 5.x. Se irán ampliando con cada módulo.</p>
+      </div>
+      <div class="grid c2" id="chuleta"></div>
+    </div>
+  </section>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="index.html#ruta">Volver a la ruta</a></div></footer>
+
+  <script type="module">
+    // t: teclas tal como se muestran · k: combinación que se comprueba en modo teclado (null = solo opción múltiple)
+    const ATAJOS = [
+      ["Navegar", "Orbitar la vista", "Botón central", null],
+      ["Navegar", "Desplazar la vista (pan)", "Shift + Botón central", null],
+      ["Navegar", "Centrar la vista en lo seleccionado", "Num .", "Num ."],
+      ["Navegar", "Vista frontal", "Num 1", "Num 1"],
+      ["Navegar", "Vista lateral derecha", "Num 3", "Num 3"],
+      ["Navegar", "Vista superior", "Num 7", "Num 7"],
+      ["Navegar", "Alternar perspectiva / ortográfica", "Num 5", "Num 5"],
+      ["Navegar", "Mirar por la cámara", "Num 0", "Num 0"],
+      ["Navegar", "Vista local (aislar selección)", "Num /", "Num /"],
+      ["Navegar", "Menú circular de vistas", "º", null],
+      ["Navegar", "Menú circular de sombreado", "Z", "Z"],
+      ["Navegar", "Rayos X", "Alt + Z", "Alt+Z"],
+      ["General", "Entrar / salir del modo edición", "Tab", "Tab"],
+      ["General", "Añadir objeto", "Shift + A", "Shift+A"],
+      ["General", "Buscar cualquier herramienta", "F3", "F3"],
+      ["General", "Seleccionar todo", "A", "A"],
+      ["General", "Deseleccionar todo", "Alt + A", "Alt+A"],
+      ["General", "Invertir selección", "Ctrl + I", "Ctrl+I"],
+      ["General", "Borrar", "X", "X"],
+      ["General", "Duplicar", "Shift + D", "Shift+D"],
+      ["General", "Duplicado enlazado (comparte malla)", "Alt + D", "Alt+D"],
+      ["General", "Ocultar / mostrar ocultos", "H / Alt + H", "H"],
+      ["General", "Aplicar escala, rotación…", "Ctrl + A", "Ctrl+A"],
+      ["General", "Menú de ajuste (snap) del cursor", "Shift + S", "Shift+S"],
+      ["General", "Barra lateral (panel N)", "N", "N"],
+      ["General", "Repetir la última acción", "Shift + R", "Shift+R"],
+      ["General", "Renderizar imagen", "F12", "F12"],
+      ["Transformar", "Mover", "G", "G"],
+      ["Transformar", "Rotar", "R", "R"],
+      ["Transformar", "Escalar", "S", "S"],
+      ["Transformar", "Restringir a un eje (tras G/R/S)", "X / Y / Z", null],
+      ["Transformar", "Excluir un eje (p. ej., escalar solo en X e Y)", "Shift + Z", "Shift+Z"],
+      ["Modelar", "Modo vértices / aristas / caras", "1 / 2 / 3", null],
+      ["Modelar", "Extruir", "E", "E"],
+      ["Modelar", "Menú de extrusión (Along Normals, Individual…)", "Alt + E", "Alt+E"],
+      ["Modelar", "Inset (borde dentro de una cara)", "I", "I"],
+      ["Modelar", "Loop Cut", "Ctrl + R", "Ctrl+R"],
+      ["Modelar", "Bevel de aristas", "Ctrl + B", "Ctrl+B"],
+      ["Modelar", "Bevel de vértices", "Ctrl + Shift + B", "Ctrl+Shift+B"],
+      ["Modelar", "Cuchillo (Knife)", "K", "K"],
+      ["Modelar", "Rellenar cara entre lo seleccionado", "F", "F"],
+      ["Modelar", "Conectar vértices con una arista", "J", "J"],
+      ["Modelar", "Seleccionar un bucle (loop)", "Alt + clic", null],
+      ["Modelar", "Seleccionar geometría conectada", "L (bajo el cursor) / Ctrl + L", "Ctrl+L"],
+      ["Modelar", "Fusionar vértices (Merge)", "M", "M"],
+      ["Modelar", "Separar en otro objeto", "P", "P"],
+      ["Modelar", "Unir objetos (modo objeto)", "Ctrl + J", "Ctrl+J"],
+      ["Modelar", "Deslizar arista (Edge Slide)", "G G", null],
+      ["Modelar", "Recalcular normales hacia fuera", "Shift + N", "Shift+N"],
+      ["Modelar", "Menú de aristas (Mark Sharp…)", "Ctrl + E", "Ctrl+E"],
+      ["Modelar", "Booleano: restar (Bool Tool)", "Ctrl + Num −", "Ctrl+Num −"],
+    ].map(([grupo, accion, t, k]) => ({ grupo, accion, t, k }));
+
+    // --- chuleta
+    const grupos = [...new Set(ATAJOS.map(a => a.grupo))];
+    const kbd = t => t.split(" / ").map(alt => alt.split(" + ").map(x => `<kbd>${x}</kbd>`).join("+")).join(" / ");
+    document.getElementById("chuleta").innerHTML = grupos.map(g => `
+      <div class="card"><h3>${g}</h3><div class="table-wrap" style="margin:0"><table>
+        ${ATAJOS.filter(a => a.grupo === g).map(a => `<tr><td>${kbd(a.t)}</td><td>${a.accion}</td></tr>`).join("")}
+      </table></div></div>`).join("");
+
+    // --- entrenador
+    let modo = "teclado", grupo = "Todos", actual = null, resuelto = false;
+    const st = { ok: 0, ko: 0, racha: 0 };
+    const $ = id => document.getElementById(id);
+    $("grupo").innerHTML = ["Todos", ...grupos].map((g, i) => `<button class="${i ? "" : "on"}" data-g="${g}">${g}</button>`).join("");
+    $("grupo").addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      grupo = b.dataset.g;
+      $("grupo").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      nueva();
+    });
+    $("modo").addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      modo = b.dataset.modo;
+      $("modo").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      nueva();
+    });
+
+    const pool = () => ATAJOS.filter(a => (grupo === "Todos" || a.grupo === grupo) && (modo === "opciones" || a.k));
+    const azar = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    function nueva() {
+      const p = pool();
+      let n; do { n = azar(p); } while (p.length > 1 && n === actual);
+      actual = n; resuelto = false;
+      $("ctx").textContent = actual.grupo;
+      $("q").textContent = actual.accion;
+      $("fb").textContent = ""; $("fb").className = "feedback";
+      if (modo === "teclado") {
+        $("zona").innerHTML = `<div class="keycap-zone listening">Pulsa la combinación en tu teclado…</div>`;
+      } else {
+        const opts = [actual];
+        const resto = ATAJOS.filter(a => a.t !== actual.t);
+        while (opts.length < 4) { const o = azar(resto); if (!opts.includes(o)) opts.push(o); }
+        opts.sort(() => Math.random() - .5);
+        $("zona").innerHTML = `<div class="opts">${opts.map(o => `<button data-t="${o.t}">${o.t}</button>`).join("")}</div>`;
+      }
+    }
+
+    function resultado(bien, texto) {
+      if (resuelto) return;
+      resuelto = true;
+      if (bien) { st.ok++; st.racha++; } else { st.ko++; st.racha = 0; }
+      $("fb").className = "feedback " + (bien ? "ok" : "bad");
+      $("fb").innerHTML = (bien ? "✔ ¡Correcto! " : "✘ Era ") + kbd(actual.t) + (texto ? ` <span style="color:var(--muted)">(pulsaste ${texto})</span>` : "");
+      $("ok").textContent = st.ok; $("ko").textContent = st.ko; $("racha").textContent = st.racha;
+      if (bien) setTimeout(() => { if (resuelto) nueva(); }, 900);
+    }
+
+    $("zona").addEventListener("click", e => {
+      const b = e.target.closest(".opts button"); if (!b || resuelto) return;
+      const bien = b.dataset.t === actual.t;
+      b.classList.add(bien ? "right" : "wrong");
+      if (!bien) $("zona").querySelector(`[data-t="${CSS.escape(actual.t)}"]`)?.classList.add("right");
+      resultado(bien);
+    });
+
+    const NUM = { NumpadDecimal: "Num .", NumpadDivide: "Num /", NumpadSubtract: "Num −", NumpadAdd: "Num +", NumpadMultiply: "Num *", NumpadEnter: "Num Enter" };
+    function combo(e) {
+      let k;
+      if (e.code.startsWith("Numpad")) k = NUM[e.code] || "Num " + e.code.slice(6);
+      else if (e.key.length === 1) k = e.key.toUpperCase();
+      else k = e.key;
+      if (["Control", "Shift", "Alt", "Meta"].includes(k)) return null;
+      return [e.ctrlKey && "Ctrl", e.shiftKey && "Shift", e.altKey && "Alt", k].filter(Boolean).join("+");
+    }
+    document.addEventListener("keydown", e => {
+      if (modo !== "teclado" || !actual) return;
+      const c = combo(e);
+      if (!c) return;
+      e.preventDefault();
+      if (resuelto) { if (e.key === "Enter" || e.key === " ") nueva(); return; }
+      resultado(c === actual.k, c === actual.k ? "" : c.replaceAll("+", " + "));
+    });
+    $("ver").addEventListener("click", () => resultado(false));
+    $("sig").addEventListener("click", nueva);
+    nueva();
+  </script>
+</body>
+</html>
