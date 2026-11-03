@@ -2,3 +2,4 @@
 *.blend2
 .claude/
 node_modules/
+__pycache__/

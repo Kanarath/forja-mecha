@@ -23,6 +23,7 @@
       <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
       <nav>
         <a href="../index.html#ruta">Ruta</a>
+        <a href="../addon.html">Addon</a>
         <a href="../atajos.html">Atajos</a>
       </nav>
     </div>
@@ -211,7 +212,7 @@
             <li>Weighted Normal (Keep Sharp) al final.</li>
           </ol>
           <p>El orden importa: <strong>Boolean → Bevel → Weighted Normal</strong>. Como el bisel se calcula <em>después</em> del corte, los bordes de las ranuras y de la línea de panel también se redondean y brillan.</p>
-          <div class="note warn"><p><strong>Bisel menor que la mitad del surco.</strong> La línea de panel mide 0.018 de ancho. Si el Bevel supera ~0.009, los dos lados se pisan y salen artefactos. Deja <em>Clamp Overlap</em> activado y empieza siempre con valores pequeños.</p></div>
+          <div class="note warn"><p><strong>Bisel menor que la mitad del surco.</strong> La línea de panel mide 0.018 de ancho. Si el Bevel supera ~0.009, los dos lados se pisan y salen artefactos. Empieza siempre con valores pequeños. Si ves <strong>manchas o triángulos negros</strong> junto a los cortes, desactiva <em>Clamp Overlap</em> en el Bevel: en surcos finos genera geometría degenerada (lo descubrimos probando el addon Forja Tools).</p></div>
           <figure><img src="../assets/img/l3_07_final.webp" alt="Malla final de la placa con bevel" loading="lazy"><figcaption>La malla resultante. Tú nunca la tocas: la generan los modificadores a partir de la base y los cortadores.</figcaption></figure>
           <div class="dl">
             <span class="ico">📦</span>

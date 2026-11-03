@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+
+id = "forja_tools"
+version = "1.0.0"
+name = "Forja Tools"
+tagline = "Herramientas hard surface gratis para modelar mechas más rápido"
+maintainer = "Forja Mecha"
+type = "add-on"
+website = "https://kanarath.github.io/forja-mecha/addon.html"
+
+tags = ["Modeling", "Mesh", "Object"]
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]

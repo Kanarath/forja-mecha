@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forja Tools · Addon hard surface gratis</title>
+  <meta name="description" content="Forja Tools: addon gratuito para Blender con las herramientas hard surface más usadas (afilar, cortes no destructivos, kitbash, revisión) explicadas en castellano.">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/forja.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="index.html"><img class="logo-mark" src="assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="index.html#ruta">Ruta</a>
+        <a href="addon.html" class="active">Addon</a>
+        <a href="atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Addon gratuito · Blender 4.2+</div>
+      <h1>Forja Tools</h1>
+      <p style="color:var(--muted);max-width:700px">Las herramientas que hacen rápidos a los addons de pago (HardOps, BoxCutter, MESHmachine, Kit Ops), en versión gratuita, en castellano y alineadas con la ruta. Cada botón hace exactamente lo que aprendiste a mano: así entiendes lo que pasa y lo haces en un clic.</p>
+      <div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+        <a class="btn" href="assets/descargas/forja_tools-1.0.0.zip" download>⬇ Descargar Forja Tools 1.0</a>
+        <a class="btn ghost" href="https://github.com/Kanarath/forja-mecha/tree/main/addon/forja_tools" target="_blank" rel="noopener">Ver el código</a>
+      </div>
+      <div class="meta"><span>25 herramientas</span><span>Panel «Forja» (N) + menú circular Shift+Alt+Q</span><span>Licencia GPL, 100 % gratis</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En esta página</h4>
+      <a href="#demo">Antes y después</a>
+      <a href="#instalar">Instalar</a>
+      <a href="#flujo">Flujo de trabajo</a>
+      <a href="#herramientas">Todas las herramientas</a>
+      <a href="#comparativa">Frente a los de pago</a>
+      <a href="#pruebas">Cómo se ha probado</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="demo">
+        <h2>Antes y después <span class="tag">// demo</span></h2>
+        <div class="compare">
+          <img src="assets/img/addon_antes.webp" alt="Bloque sin trabajar">
+          <div class="after"><img src="assets/img/addon_despues.webp" alt="Bloque trabajado con Forja Tools"></div>
+          <div class="handle"></div>
+          <span class="lab l">UN CUBO</span><span class="lab r">20 CLICS DESPUÉS</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar antes y después de usar Forja Tools">
+        </div>
+        <p>Este resultado lo ha generado el propio addon en una prueba automática: <strong>Afilar</strong>, cortadores de <strong>ranura</strong> repetidos con <strong>En fila</strong> (rejilla), <strong>agujero</strong>, <strong>guiones</strong> en el frente, <strong>Rebanar</strong> una esquina, <strong>tornillos</strong> y <strong>LED</strong> como piezas, y alrededor un <strong>cable</strong> entre un conector y un disipador, un <strong>pistón</strong> y una tuerca.</p>
+        <figure><img src="assets/img/addon_estudio.webp" alt="La misma pieza en el estudio de render del addon" loading="lazy"><figcaption>Botón <strong>Estudio de render</strong>: fondo curvo, tres luces, cámara de 50 mm y Glare, alrededor de lo que tengas seleccionado.</figcaption></figure>
+      </section>
+
+      <section id="instalar">
+        <h2>Instalar <span class="tag">// 1 minuto</span></h2>
+        <ol>
+          <li>Descarga <code>forja_tools-1.0.0.zip</code> con el botón de arriba. <strong>No lo descomprimas.</strong></li>
+          <li>En Blender: <code>Edit → Preferences → Get Extensions</code>.</li>
+          <li>Arriba a la derecha, la flecha <strong>⌄</strong> → <strong>Install from Disk…</strong> → elige el .zip.</li>
+          <li>Listo. En el visor 3D pulsa <kbd>N</kbd> → pestaña <strong>Forja</strong>. Y <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>Q</kbd> abre el menú circular.</li>
+        </ol>
+        <div class="note tip"><p><strong>El panel cambia según el modo:</strong> en modo objeto ves Acabado, Cortes, Simetría, Piezas y Revisión. En modo edición (<kbd>Tab</kbd>), las herramientas de modelado. El menú circular también cambia.</p></div>
+        <div class="note warn"><p><strong>¿El atajo choca con otro?</strong> <code>Preferences → Keymap</code>, cambia el buscador a <em>Key-Binding</em> y escribe «shift alt q» para encontrarlo y cambiarlo. Y cada botón tiene una explicación si dejas el ratón encima.</p></div>
+      </section>
+
+      <section id="flujo">
+        <h2>Flujo de trabajo <span class="tag">// receta</span></h2>
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Bloquea la forma</h3></div>
+          <p>Cubos, cilindros, perfiles… como en la ruta. Si quieres simetría: <strong>Espejo X</strong>.</p>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Afilar</h3></div>
+          <p>Un clic hace la receta del <a href="modulos/m2-sombreado.html">módulo 2</a>: aplica escala, Shade Smooth, aristas duras, Bevel (Angle + Harden Normals) y Weighted Normal, ordenados. Después <strong>Ancho bisel</strong>: mueve el ratón para ajustarlo y gira la rueda para los segmentos.</p>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Corta</h3></div>
+          <p>Coloca el cursor sobre la superficie (<kbd>Shift</kbd>+clic derecho) y pulsa <strong>Ranura</strong>, <strong>Agujero</strong>, <strong>Panel</strong>… El cortador aparece ya cortando y seleccionado: muévelo con <kbd>G</kbd>, gíralo con <kbd>R</kbd> y escálalo con <kbd>S</kbd>. Con <strong>En fila</strong> lo conviertes en rejilla. O selecciona tus propios objetos, luego la pieza, y pulsa <strong>Cortar</strong>.</p>
+          <div class="note tip"><p><strong>Cursor alineado:</strong> en la herramienta Cursor (barra de la izquierda), pon <em>Orientation: Geometry</em>. Así <kbd>Shift</kbd>+clic derecho también gira el cursor según la superficie, y los cortadores y piezas salen orientados.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Detalla en modo edición</h3></div>
+          <p>Selecciona caras y usa <strong>Hundir</strong> o <strong>Sacar</strong> (Inset + Extrude), <strong>Línea de panel</strong> (surco alrededor de las caras) o <strong>Placa desde caras</strong> (la capa extra de blindaje).</p>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Kitbash</h3></div>
+          <p><strong>Piezas</strong>: tornillo, tuerca, rejilla, LED, engranaje, disipador, conector, toma de aire. <strong>Pistón</strong> animable y <strong>Cable</strong> entre dos objetos, con caída. También en <kbd>Shift</kbd>+<kbd>A</kbd> → <em>Piezas Forja</em>.</p>
+        </div>
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Revisa, viste y renderiza</h3></div>
+          <p><strong>Revisar</strong> (y <strong>Arreglar</strong> si hace falta), materiales en un clic y <strong>Estudio de render</strong>.</p>
+        </div>
+      </section>
+
+      <section id="herramientas">
+        <h2>Todas las herramientas <span class="tag">// referencia</span></h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Herramienta</th><th>Qué hace</th><th>Aprende cómo funciona</th></tr>
+            <tr><td colspan="3" style="color:var(--cyan);font-family:var(--font-head)">ACABADO · modo objeto</td></tr>
+            <tr><td><strong>Afilar</strong></td><td>La receta completa en un clic. Ajusta ángulo, ancho y segmentos en el panel de la esquina inferior izquierda (F9).</td><td><a href="modulos/m2-sombreado.html">Módulo 2</a></td></tr>
+            <tr><td><strong>Ancho bisel</strong></td><td>Interactivo: ratón = ancho, rueda = segmentos, clic = aceptar.</td><td><a href="modulos/m2-sombreado.html">Módulo 2</a></td></tr>
+            <tr><td><strong>Step</strong></td><td>Aplica el bisel grande y añade otro pequeño encima (bisel doble).</td><td>—</td></tr>
+            <tr><td><strong>Ordenar pila</strong></td><td>Mirror → Array → Solidify → Boolean → Bevel → Subdivision → Weighted Normal.</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td colspan="3" style="color:var(--cyan);font-family:var(--font-head)">CORTES · modo objeto</td></tr>
+            <tr><td><strong>Cortar / Unir / Intersecar</strong></td><td>Selecciona cortadores y luego la pieza. Boolean no destructivo; el cortador se pone en wire, se oculta del render, va a la colección <em>Cortadores</em> y se emparenta con la pieza.</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td><strong>Rebanar</strong></td><td>Corta y crea una pieza aparte con lo cortado (paneles que se abren, tapas).</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td><strong>Nuevo cortador</strong></td><td>Ranura, agujero, caja, hexágono, guion o panel, en el cursor 3D, ya cortando.</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td><strong>Ver/ocultar · Aplicar</strong></td><td>Oculta todos los cortadores, o aplica los booleanos y borra los que ya no se usan.</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td colspan="3" style="color:var(--cyan);font-family:var(--font-head)">SIMETRÍA Y REPETICIÓN · modo objeto</td></tr>
+            <tr><td><strong>Espejo X / Y / Z</strong></td><td>Con un objeto: simetría con recorte. Con varios: refleja respecto al activo.</td><td><a href="modulos/m9-androide.html">Módulo 9</a></td></tr>
+            <tr><td><strong>En fila</strong></td><td>Array lineal. Sobre un cortador, deja siempre un hueco entre copias.</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td><strong>En círculo</strong></td><td>Array radial alrededor del cursor 3D (bridas, aletas, dientes).</td><td><a href="modulos/m5-placa-base.html">Módulo 5</a></td></tr>
+            <tr><td colspan="3" style="color:var(--cyan);font-family:var(--font-head)">MODELADO · modo edición</td></tr>
+            <tr><td><strong>Hundir / Sacar</strong></td><td>Inset + Extrude en un paso, por región o cara a cara.</td><td><a href="modulos/m1-celda-energia.html">Módulo 1</a></td></tr>
+            <tr><td><strong>Línea de panel</strong></td><td>Surco no destructivo alrededor de las caras seleccionadas. Reduce el bisel si no cabe.</td><td><a href="modulos/m3-placa-blindaje.html">Módulo 3</a></td></tr>
+            <tr><td><strong>Placa desde caras</strong></td><td>Copia las caras como una placa aparte, con margen, separación y grosor.</td><td><a href="modulos/m6-espada-arma.html">Módulo 6</a></td></tr>
+            <tr><td><strong>Support loops</strong></td><td>Dos apoyos pegados a las aristas seleccionadas, para Subdivision.</td><td><a href="modulos/m4-cabeza-robot.html">Módulo 4</a></td></tr>
+            <tr><td><strong>Pliegue</strong></td><td>Edge crease en las aristas seleccionadas.</td><td><a href="modulos/m4-cabeza-robot.html">Módulo 4</a></td></tr>
+            <tr><td><strong>Círculo perfecto</strong></td><td>Redondea un bucle de vértices (como LoopTools → Circle).</td><td>—</td></tr>
+            <tr><td colspan="3" style="color:var(--cyan);font-family:var(--font-head)">PIEZAS · modo objeto</td></tr>
+            <tr><td><strong>8 piezas</strong></td><td>Tornillo, tuerca, rejilla, LED, engranaje, disipador, conector y toma de aire, en el cursor, con bevel y materiales. Si hay una pieza activa, se emparentan con ella.</td><td><a href="modulos/m5-placa-base.html">Módulo 5</a></td></tr>
+            <tr><td><strong>Pistón</strong></td><td>Camisa + vástago con Damped Track entre dos anclajes. Mueve un anclaje y se estira.</td><td><a href="modulos/m7-brazo-robotico.html">Módulo 7</a></td></tr>
+            <tr><td><strong>Cable</strong></td><td>Uno o varios cables con caída entre los dos objetos seleccionados.</td><td><a href="modulos/m5-placa-base.html">Módulo 5</a></td></tr>
+            <tr><td colspan="3" style="color:var(--cyan);font-family:var(--font-head)">MATERIALES, RENDER Y REVISIÓN</td></tr>
+            <tr><td><strong>Materiales</strong></td><td>Pintura con desgaste en bordes y suciedad (Cycles), metal oscuro, goma, luces y cristal. En modo edición se aplican a las caras seleccionadas.</td><td><a href="modulos/m8-materiales-render.html">Módulo 8</a></td></tr>
+            <tr><td><strong>Estudio de render</strong></td><td>Ciclorama, tres luces, cámara de 50 mm, AgX y Glare alrededor de la selección.</td><td><a href="modulos/m0-preparacion.html">Módulo 0</a></td></tr>
+            <tr><td><strong>Revisar</strong></td><td>Escala, orden de la pila, booleanos sin cortador, n-gons con Subdivision, agujeros, duplicados… El informe queda en el panel.</td><td><a href="modulos/m2-sombreado.html">Módulo 2</a></td></tr>
+            <tr><td><strong>Arreglar</strong></td><td>Aplica escala, corrige normales, une duplicados y borra lo suelto.</td><td><a href="modulos/m2-sombreado.html">Módulo 2</a></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="comparativa">
+        <h2>Frente a los addons de pago <span class="tag">// honestidad</span></h2>
+        <p>Los addons profesionales llevan años de desarrollo y hacen más cosas. Esto es lo que cubre Forja Tools y lo que no:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Addon de pago</th><th>Su función estrella</th><th>En Forja Tools</th></tr>
+            <tr><td><strong>HardOps</strong></td><td>Sharpen / Step / bWidth, Mirror, gestión de modificadores</td><td style="color:var(--green)">✔ Afilar, Step, Ancho bisel, Espejo, Ordenar</td></tr>
+            <tr><td><strong>BoxCutter</strong></td><td>Dibujar el corte directamente sobre la superficie</td><td style="color:var(--amber)">≈ Cortadores prefabricados en el cursor (no se dibujan a mano alzada)</td></tr>
+            <tr><td><strong>MESHmachine</strong></td><td>Chaflanes variables, arreglar booleanos</td><td style="color:var(--amber)">≈ Revisar + Arreglar + bisel sin manchas (sin edición de chaflanes)</td></tr>
+            <tr><td><strong>Kit Ops</strong></td><td>Insertar piezas de una biblioteca</td><td style="color:var(--green)">✔ 8 piezas procedurales + pistón + cable (y tu Asset Browser del módulo 5)</td></tr>
+            <tr><td><strong>DECALmachine</strong></td><td>Decals realistas</td><td style="color:var(--red)">✘ No incluido (lo verás en el módulo de decals)</td></tr>
+            <tr><td><strong>MACHIN3tools</strong> (gratis)</td><td>Menús circulares</td><td style="color:var(--green)">✔ Menú circular Shift+Alt+Q, que cambia según el modo</td></tr>
+          </table>
+        </div>
+        <div class="note why"><p><strong>Por qué así:</strong> para alguien que empieza, un addon que lo hace todo con magia es un arma de doble filo. Forja Tools solo automatiza lo que la ruta te ha enseñado. Si un botón hace algo raro, sabes qué hay debajo y puedes corregirlo a mano.</p></div>
+      </section>
+
+      <section id="pruebas">
+        <h2>Cómo se ha probado <span class="tag">// calidad</span></h2>
+        <p>Cada herramienta se ejecuta en una prueba automática dentro de Blender 4.2 LTS (<a href="https://github.com/Kanarath/forja-mecha/blob/main/tools/test_addon.py" target="_blank" rel="noopener">tools/test_addon.py</a>), que comprueba los resultados y genera las imágenes de esta página. Al probarlo encontramos y corregimos dos fallos que también te pasarían a mano:</p>
+        <ul>
+          <li><strong>Copias de un cortador que se tocan</strong> (Array con separación 1) → el booleano devolvía una pieza vacía. Ahora los booleanos usan <em>Self Intersection</em> y <em>Hole Tolerant</em>, y En fila deja siempre un hueco.</li>
+          <li><strong>Triángulos negros junto a líneas de panel</strong> → los causaba <em>Clamp Overlap</em> del Bevel. Ahora está desactivado y el ancho se limita automáticamente.</li>
+        </ul>
+        <div class="note warn"><p><strong>Lo que no se ha podido probar automáticamente:</strong> el aspecto del panel y del menú circular en pantalla, y la herramienta interactiva Ancho bisel (necesita ratón). Si algo no se ve bien en tu Blender, dímelo y lo arreglo.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA · Forja Tools 1.0 · GPL-3.0</span><a href="index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="assets/js/forja.js"></script>
+</body>
+</html>
