@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04 · Cabeza de robot · Forja Mecha</title>
+  <meta name="description" content="Modela una cabeza de robot en Blender con Subdivision Surface y support loops: curvas suaves con bordes nítidos, estilo mecha.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m4-cabeza-robot">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 04</div>
+      <h1>Cabeza de robot</h1>
+      <p style="color:var(--muted);max-width:680px">Los cascos de los androides y los Gundam tienen curvas suaves y aun así bordes nítidos. Eso se consigue con el otro gran flujo del hard surface: <strong>Subdivision Surface</strong> controlada con <strong>support loops</strong>. Aquí vas a aprovechar tu experiencia con el modelado orgánico.</p>
+      <div class="meta"><span>~2 horas</span><span>Nivel: medio</span><span>Herramientas: Subdivision · Support loops · Crease · To Sphere</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#concepto">Subdivisión y la jaula</a>
+      <a href="#apoyos">Tres formas de afilar</a>
+      <a href="#visor">La cabeza en 3D</a>
+      <a href="#p1">1 · Bloque</a>
+      <a href="#p2">2 · Forma</a>
+      <a href="#p3">3 · Subdivisión</a>
+      <a href="#p4">4 · Visor sin apoyos</a>
+      <a href="#p5">5 · Support loops</a>
+      <a href="#p6">6 · Piezas duras</a>
+      <a href="#topologia">Reglas de topología</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l4_eevee.webp" alt="Cabeza de robot blanca con visor azul brillante, cresta amarilla en V y orejeras negras" loading="lazy">
+          <figcaption>Casco suave con subdivisión, visor nítido gracias a los support loops, y piezas duras (orejeras, cresta en V y cuello) hechas con el flujo de bevel de los módulos anteriores.</figcaption>
+        </figure>
+        <p>Es una cabeza sencilla a propósito: el objetivo es que entiendas cómo se controla una superficie subdividida. Con eso podrás hacer cualquier casco, hombrera o pieza curva del androide.</p>
+      </section>
+
+      <section id="concepto">
+        <h2>Subdivisión y la «jaula» <span class="tag">// concepto</span></h2>
+        <p>El modificador <strong>Subdivision Surface</strong> divide cada cara en cuatro y suaviza el resultado, una y otra vez. Tú no editas la superficie suave, sino una malla sencilla que la rodea: la <strong>jaula</strong> (<em>cage</em>). En las imágenes, la jaula son las líneas negras.</p>
+        <figure data-tabs>
+          <div class="tabs">
+            <button class="on" data-src="../assets/img/l4_cubo_blob.webp" data-cap="<strong>Sin apoyos:</strong> un cubo de 8 vértices subdividido se convierte en una bola. Los vértices de la jaula «tiran» de la superficie, pero de lejos.">Sin apoyos</button>
+            <button data-src="../assets/img/l4_cubo_loops.webp" data-cap="<strong>Support loops:</strong> un corte muy cerca de cada arista. Cuanto más cerca está el apoyo del borde, más afilado queda. Las caras grandes siguen perfectamente planas.">Support loops</button>
+            <button data-src="../assets/img/l4_cubo_crease.webp" data-cap="<strong>Edge crease (0.85):</strong> mismo cubo de 8 vértices, pero cada arista tiene un «pliegue» que le dice a la subdivisión que no la suavice tanto. Sin geometría extra.">Crease</button>
+          </div>
+          <img src="../assets/img/l4_cubo_blob.webp" alt="Cubo subdividido mostrando la jaula" loading="lazy">
+          <figcaption><strong>Sin apoyos:</strong> un cubo de 8 vértices subdividido se convierte en una bola. Los vértices de la jaula «tiran» de la superficie, pero de lejos.</figcaption>
+        </figure>
+        <div class="note why"><p><strong>La regla de oro:</strong> la subdivisión redondea <em>en proporción a la distancia entre aristas</em>. Aristas separadas = curva amplia. Aristas juntas = borde nítido. Todo este módulo es aplicar esa idea.</p></div>
+      </section>
+
+      <section id="apoyos">
+        <h2>Tres formas de afilar un borde <span class="tag">// técnicas</span></h2>
+        <p>Gira los tres cubos y compara sus bordes:</p>
+        <forja-visor
+          data-modelos="cubo_blob,cubo_loops,cubo_crease"
+          data-etiquetas="Sin apoyos|Support loops|Crease"
+          data-notas="La jaula (líneas) está lejos de la superficie: todo se redondea.|Los cortes cerca de cada arista mantienen el cubo y redondean solo el borde.|Mismo cubo de 8 vértices; el crease endurece las aristas."></forja-visor>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Técnica</th><th>Cómo</th><th>Cuándo</th></tr>
+            <tr><td><strong>Support loops</strong></td><td><kbd>Ctrl</kbd>+<kbd>R</kbd> y deslizar el corte cerca del borde, o un Inset pequeño alrededor de un hueco</td><td>La más usada y la más controlable. Es la que verás en todos los tutoriales.</td></tr>
+            <tr><td><strong>Edge crease</strong></td><td>Selecciona aristas → <kbd>Shift</kbd>+<kbd>E</kbd> y escribe un valor de 0 a 1</td><td>Para probar rápido. Con 1 el borde queda totalmente afilado, lo que no es realista.</td></tr>
+            <tr><td><strong>Bevel antes del Subdivision</strong></td><td>Un modificador Bevel (2 segmentos, Angle) <em>encima</em> del Subdivision en la pila</td><td>Crea los apoyos por ti y deja la jaula limpia. Muy cómodo para piezas complejas.</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="visor">
+        <h2>Gírala paso a paso <span class="tag">// 3D</span></h2>
+        <p>Las líneas son la jaula, que es lo que editas tú. La superficie gris es lo que genera la subdivisión. Fíjate en los pasos 4 y 5: la diferencia está en los apoyos alrededor del visor.</p>
+        <forja-visor data-vista="0.6,0.3,1"
+          data-modelos="cabeza_01,cabeza_02,cabeza_03,cabeza_04,cabeza_05,cabeza_06"
+          data-etiquetas="1 Bloque|2 Forma|3 Subdiv.|4 Visor|5 Apoyos|6 Final"
+          data-notas="Un cubo subdividido con 2 cortes: una rejilla de 3×3 en cada cara.|To Sphere + ajustes: la forma del casco con muy pocos vértices.|Subdivision nivel 2 + Shade Smooth: la jaula controla una superficie suave.|Visor extruido sin apoyos: el borde queda blando y deformado.|Inset fino + extrusiones en tramos: el visor ya tiene bordes nítidos.|Orejeras, cresta en V y cuello: piezas duras con Bevel, apoyadas sobre la cabeza."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>El bloque</h3></div>
+          <figure><img src="../assets/img/l4_01_bloque.webp" alt="Cubo subdividido en una rejilla de 3 por 3" loading="lazy"></figure>
+          <ol>
+            <li>Cubo con <strong>Dimensions</strong> <code>0.8</code> × <code>0.95</code> × <code>1.0</code> → <kbd>Ctrl</kbd>+<kbd>A</kbd> Scale.</li>
+            <li><kbd>Tab</kbd>, <kbd>A</kbd>, clic derecho → <strong>Subdivide</strong>. En el panel de abajo a la izquierda: <strong>Number of Cuts 2</strong>.</li>
+            <li>Activa la simetría: en la cabecera del visor 3D, el icono de la mariposa → <strong>X</strong>. A partir de ahora, lo que muevas en un lado se refleja en el otro.</li>
+          </ol>
+          <div class="note why"><p><strong>¿Por qué 3×3?</strong> Queremos una fila central de caras para el visor, y pocas aristas para controlar curvas amplias. Empieza siempre con la mínima malla posible: es mucho más fácil de moldear.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Dar forma de casco</h3></div>
+          <figure><img src="../assets/img/l4_02_forma.webp" alt="Bloque redondeado con forma de casco" loading="lazy"></figure>
+          <ol>
+            <li>Con todo seleccionado: <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd> (<strong>To Sphere</strong>) y escribe <code>0.5</code>. El bloque se redondea a medio camino entre caja y esfera.</li>
+            <li>La cara debe quedar más plana: selecciona los vértices de la cara frontal (vista frontal <kbd>Num 1</kbd>, rayos X y selección de caja) y escálalos en Y: <kbd>S</kbd> <kbd>Y</kbd> <code>0.6</code>.</li>
+            <li>Barbilla: selecciona la fila de vértices de abajo y estréchala con <kbd>S</kbd> <kbd>X</kbd> <code>0.75</code>.</li>
+            <li>Ajusta a ojo con <strong>edición proporcional</strong> (<kbd>O</kbd>): al mover un vértice arrastra a los vecinos. Gira la <kbd>Rueda</kbd> durante el movimiento para cambiar el radio de influencia.</li>
+          </ol>
+          <div class="note tip"><p><strong>Tu experiencia orgánica cuenta:</strong> esta fase es como esculpir con muy pocos puntos. Busca una silueta que funcione desde el frente, de lado y desde arriba. Si la forma no funciona aquí, no la arreglará ningún detalle.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Activar la subdivisión</h3></div>
+          <figure><img src="../assets/img/l4_03_subdivision.webp" alt="Casco suavizado con la jaula visible alrededor" loading="lazy"></figure>
+          <ol>
+            <li>En modo objeto, pulsa <kbd>Ctrl</kbd>+<kbd>2</kbd>: añade un <strong>Subdivision Surface</strong> de nivel 2 (con <kbd>Ctrl</kbd>+<kbd>1</kbd> o <kbd>Ctrl</kbd>+<kbd>3</kbd> eliges otros niveles).</li>
+            <li>Clic derecho → <strong>Shade Smooth</strong>.</li>
+            <li>En el modificador, deja <em>Levels Viewport</em> en 2 y <em>Render</em> en 2 o 3.</li>
+          </ol>
+          <div class="note warn"><p><strong>No subas los niveles para «arreglar» la forma.</strong> Más niveles solo añaden polígonos, no cambian la silueta. Si algo está blando, faltan apoyos en la jaula.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>El visor… sin apoyos (para ver el problema)</h3></div>
+          <figure><img src="../assets/img/l4_04_visor_limpio.webp" alt="Visor con bordes blandos y deformados" loading="lazy"></figure>
+          <ol>
+            <li>Modo edición, caras: selecciona las 3 caras centrales del frente.</li>
+            <li><kbd>E</kbd> <code>-0.07</code> <kbd>Enter</kbd>: el visor se hunde.</li>
+          </ol>
+          <p>Mira el resultado: el hueco parece de plastilina, con los bordes blandos y la cara entera deformada a su alrededor. La subdivisión redondea desde la arista del hueco hasta las aristas vecinas, que están lejos. <strong>Deshazlo con <kbd>Ctrl</kbd>+<kbd>Z</kbd></strong> y vamos a hacerlo bien.</p>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>El visor con support loops</h3></div>
+          <div class="compare">
+            <img src="../assets/img/l4_04_visor_limpio.webp" alt="Visor sin apoyos">
+            <div class="after"><img src="../assets/img/l4_05_apoyos_limpio.webp" alt="Visor con apoyos"></div>
+            <div class="handle"></div>
+            <span class="lab l">SIN APOYOS</span><span class="lab r">CON SUPPORT LOOPS</span>
+            <input type="range" min="0" max="100" value="50" aria-label="Comparar visor sin y con support loops">
+          </div>
+          <ol>
+            <li>Con las 3 caras del visor seleccionadas: <kbd>I</kbd> <code>0.035</code> <kbd>Enter</kbd> (deja margen para el marco).</li>
+            <li><kbd>I</kbd> <code>0.015</code> <kbd>Enter</kbd>: <strong>primer apoyo</strong>, pegado al borde del hueco, en la superficie.</li>
+            <li><kbd>E</kbd> <code>-0.012</code>: <strong>segundo apoyo</strong>, justo debajo del borde, en la pared.</li>
+            <li><kbd>E</kbd> <code>-0.046</code>: la profundidad del hueco.</li>
+            <li><kbd>E</kbd> <code>-0.012</code>: <strong>tercer apoyo</strong>, al fondo de la pared.</li>
+            <li><kbd>I</kbd> <code>0.015</code>: <strong>cuarto apoyo</strong>, en el fondo.</li>
+            <li>Con el fondo seleccionado: pestaña Material → <strong>+</strong> (nuevo hueco) → New → Emission azul → <strong>Assign</strong>.</li>
+          </ol>
+          <figure><img src="../assets/img/l4_05_apoyos.webp" alt="Jaula del casco con los apoyos alrededor del visor" loading="lazy"><figcaption>En la jaula se ven los anillos dobles alrededor del visor: cada par de líneas muy juntas es un borde nítido.</figcaption></figure>
+          <div class="note tip"><p><strong>Patrón: cada borde nítido necesita una arista cerca a cada lado.</strong> Un borde de hueco tiene dos lados: la superficie y la pared. Por eso hay un apoyo en cada uno, y lo mismo en el fondo.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Piezas duras: orejeras, cresta en V y cuello</h3></div>
+          <figure><img src="../assets/img/l4_06_final_limpio.webp" alt="Cabeza completa con orejeras, cresta en V y cuello" loading="lazy"></figure>
+          <p>No hace falta que todo sea una sola malla subdividida. Las piezas mecánicas pequeñas se hacen aparte, con el flujo de bevel, y se apoyan como <em>floaters</em> (módulo 3):</p>
+          <ul>
+            <li><strong>Orejeras:</strong> cilindros de 16 lados girados 90°, con Inset/Extrude en la tapa (como la celda del módulo 1) y Bevel con Harden Normals.</li>
+            <li><strong>Cresta en V:</strong> un plano en vista frontal; en modo edición dale forma de hoja con 4–5 vértices, <kbd>E</kbd> para darle grosor (0.03) y un modificador <strong>Mirror</strong> en X para la otra mitad. Color amarillo: el guiño Gundam.</li>
+            <li><strong>Cuello:</strong> un cilindro ligeramente cónico (Radius 1 y 2 distintos en el panel <em>Add Cylinder</em>).</li>
+          </ul>
+          <div class="note why"><p><strong>Combinar flujos</strong> es lo que hacen los profesionales: subdivisión para las grandes superficies curvas, bevel y booleanos para la mecánica, y floaters para el detalle. Cada herramienta donde mejor funciona.</p></div>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>cabeza_robot.blend</strong><small>La cabeza final con su jaula editable, el Subdivision y las piezas duras.</small></div>
+            <a class="btn small ghost" href="../assets/blend/cabeza_robot.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="topologia">
+        <h2>Reglas de topología para subdivisión <span class="tag">// chuleta</span></h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Regla</th><th>Por qué</th></tr>
+            <tr><td><strong>Todo quads</strong> (caras de 4 lados)</td><td>La subdivisión está pensada para quads. Los triángulos y los n-gons crean pellizcos y bultos. Aquí, al contrario que en el módulo 2, los n-gons sí son un problema.</td></tr>
+            <tr><td><strong>Polos lejos de las curvas visibles</strong></td><td>Un polo es un vértice con 3 o con 5 o más aristas. Son inevitables, pero colócalos en zonas planas o poco visibles.</td></tr>
+            <tr><td><strong>Mínima jaula posible</strong></td><td>Menos vértices = curvas más limpias y más fáciles de controlar. Añade cortes solo donde necesites apoyos o detalle.</td></tr>
+            <tr><td><strong>Booleanos, fuera</strong></td><td>Un booleano sobre una malla subdividida genera n-gons y triángulos que se deforman. Haz los cortes con Inset/Extrude/Knife y apoyos, o pon los detalles como piezas aparte.</td></tr>
+            <tr><td><strong>Escala aplicada</strong></td><td>Igual que con el Bevel: <kbd>Ctrl</kbd>+<kbd>A</kbd> antes de los modificadores.</td></tr>
+          </table>
+        </div>
+        <div class="note free"><p><strong>Comprueba la malla:</strong> el <a href="m2-sombreado.html#revisor">Revisor de Forja</a> detecta los n-gons y los triángulos en objetos con Subdivision y te avisa.</p></div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu propia cabeza <span class="tag">// checklist</span></h2>
+        <p>Diseña la cabeza de <strong>tu</strong> androide. Algunas ideas del género mecha:</p>
+        <ul>
+          <li><strong>Dos ojos</strong> en vez de visor: dos grupos de caras, cada uno con sus apoyos.</li>
+          <li><strong>Mono-ojo</strong>: una ranura horizontal muy larga, con un «ojo» emisivo que la recorre.</li>
+          <li>Rejillas en la barbilla como floaters (con el Array del módulo 3).</li>
+          <li>Antenas o una cresta distinta: aletas laterales, un cuerno central…</li>
+        </ul>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="jaula"><span>Sé explicar qué es la jaula y por qué la subdivisión redondea</span></label></li>
+          <li><label><input type="checkbox" data-id="tres"><span>He probado las tres técnicas en un cubo: support loops, crease y Bevel antes del Subdivision</span></label></li>
+          <li><label><input type="checkbox" data-id="simetria"><span>He modelado con la simetría X activada</span></label></li>
+          <li><label><input type="checkbox" data-id="forma"><span>He dado forma con To Sphere y edición proporcional sin añadir vértices</span></label></li>
+          <li><label><input type="checkbox" data-id="apoyos"><span>Mi visor u ojos tienen apoyos en la superficie, la pared y el fondo</span></label></li>
+          <li><label><input type="checkbox" data-id="quads"><span>Toda la jaula es de quads (el Revisor no encuentra n-gons)</span></label></li>
+          <li><label><input type="checkbox" data-id="duras"><span>Al menos dos piezas duras con Bevel apoyadas sobre la cabeza</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Render en mi estudio con el visor emisivo</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

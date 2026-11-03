@@ -699,6 +699,194 @@ def lesson3_eevee():
     render("l3_eevee", 1600, 900)
 
 
+# --------------------------------------------- Lección 4: cabeza de robot
+
+def subsurf(o, levels=2):
+    m = o.modifiers.new("Subdivision", "SUBSURF")
+    m.levels = levels
+    m.render_levels = levels
+    return m
+
+
+def extrude_move(bm, faces, vec):
+    """Extrude de región + mover; devuelve las caras nuevas (como E en Blender)."""
+    r = bmesh.ops.extrude_face_region(bm, geom=faces)
+    nf = [g for g in r["geom"] if isinstance(g, bmesh.types.BMFace)]
+    nv = [g for g in r["geom"] if isinstance(g, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=nv, vec=vec)
+    bmesh.ops.delete(bm, geom=faces, context="FACES")
+    return nf
+
+
+def concept_cubes():
+    """Tres cubos con Subdivision: sin apoyos, con support loops y con crease."""
+    out = {}
+    for key in ("blob", "loops", "crease"):
+        bm = bmesh.new()
+        bmesh.ops.create_cube(bm, size=1.0)
+        if key == "loops":
+            for axis in range(3):
+                for d in (-0.42, 0.42):
+                    co, no = [0, 0, 0], [0, 0, 0]
+                    co[axis], no[axis] = d, 1
+                    geom = list(bm.verts) + list(bm.edges) + list(bm.faces)
+                    bmesh.ops.bisect_plane(bm, geom=geom, plane_co=co, plane_no=no)
+        o = obj_from_bm("Cubo_" + key, bm, MATS()["armor"], smooth=True)
+        if key == "crease":
+            a = o.data.attributes.new("crease_edge", "FLOAT", "EDGE")
+            for i in range(len(o.data.edges)):
+                a.data[i].value = 0.85
+        subsurf(o)
+        out[key] = o
+    return out
+
+
+def head_bm(paso):
+    """Cabeza: cubo subdividido, moldeado, con visor (paso>=4) y support loops (paso>=5)."""
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    bmesh.ops.subdivide_edges(bm, edges=bm.edges, cuts=2, use_grid_fill=True)
+    if paso == 1:
+        for v in bm.verts:
+            v.co = Vector((v.co.x * 0.8, v.co.y * 0.95, v.co.z * 1.0))
+        return bm
+    radios = Vector((0.42, 0.5, 0.52))
+    for v in bm.verts:
+        p = Vector((v.co.x * 0.8, v.co.y * 0.95, v.co.z * 1.0))
+        e = Vector((p.x / radios.x, p.y / radios.y, p.z / radios.z)).length
+        q = p / e  # el mismo punto llevado a un elipsoide
+        t = 0.35 + 0.3 * max(0, min(1, p.z / 0.5)) + 0.25 * max(0, min(1, p.y / 0.475))
+        t -= 0.3 * max(0, min(1, -p.y / 0.475))  # la cara se queda más plana
+        t = max(0.05, min(0.85, t))
+        p = p.lerp(q, t)
+        if p.z < 0:  # barbilla más estrecha
+            p.x *= 1 - 0.28 * (-p.z / 0.5)
+            p.y *= 1 - 0.12 * (-p.z / 0.5)
+        v.co = p
+    bm.normal_update()
+    if paso >= 4:
+        visor = [f for f in bm.faces if f.normal.y < -0.5 and abs(f.calc_center_median().z) < 0.15]
+        if paso == 4:
+            # sin apoyos: extruir directamente, el contorno queda lejos de las aristas vecinas
+            fondo = extrude_move(bm, visor, (0, 0.07, 0))
+        else:
+            bmesh.ops.inset_region(bm, faces=visor, thickness=0.035, depth=0, use_even_offset=True)
+            bmesh.ops.inset_region(bm, faces=visor, thickness=0.015, depth=0, use_even_offset=True)
+            f = extrude_move(bm, visor, (0, 0.012, 0))
+            f = extrude_move(bm, f, (0, 0.046, 0))
+            fondo = extrude_move(bm, f, (0, 0.012, 0))
+            bmesh.ops.inset_region(bm, faces=fondo, thickness=0.015, depth=0, use_even_offset=True)
+        for f in fondo:
+            f.material_index = 1
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
+def head_extras(M):
+    """Piezas duras que flotan sobre la cabeza subdividida: orejeras, cresta en V y cuello."""
+    extras = []
+    for s in (-1, 1):
+        b = bmesh.new()
+        bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=16, radius1=0.15, radius2=0.15, depth=0.1)
+        b.normal_update()
+        cap = max((f for f in b.faces if f.normal.z > 0.99), key=lambda f: f.calc_center_median().z)
+        bmesh.ops.inset_individual(b, faces=[cap], thickness=0.03, depth=0)
+        bmesh.ops.inset_individual(b, faces=[cap], thickness=0.03, depth=-0.025)
+        bmesh.ops.inset_individual(b, faces=[cap], thickness=0.03, depth=0.04)
+        o = obj_from_bm(f"Orejera_{'D' if s > 0 else 'I'}", b, M["dark"], smooth=True)
+        o.rotation_euler = (0, math.radians(90 * s), 0)
+        o.location = (0.4 * s, 0.03, 0.02)
+        bv = o.modifiers.new("Bevel", "BEVEL")
+        bv.width, bv.segments, bv.harden_normals, bv.limit_method = 0.008, 2, True, "ANGLE"
+        extras.append(o)
+    pts = [(0.0, 0.0), (0.045, -0.01), (0.26, 0.17), (0.24, 0.195), (0.02, 0.045)]
+    fin = prism("Cresta_V", pts, 0, 0.03, mat("Amarillo", (0.95, 0.62, 0.08), 0.2, 0.35))
+    fin.rotation_euler = (math.radians(90), 0, 0)
+    fin.location = (0, -0.462, 0.17)
+    mi = fin.modifiers.new("Mirror", "MIRROR")
+    mi.use_bisect_axis[0] = False
+    bv = fin.modifiers.new("Bevel", "BEVEL")
+    bv.width, bv.segments, bv.harden_normals = 0.004, 2, True
+    for p in fin.data.polygons:
+        p.use_smooth = True
+    extras.append(fin)
+    b = bmesh.new()
+    bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=16, radius1=0.15, radius2=0.17, depth=0.4)
+    bmesh.ops.translate(b, verts=b.verts, vec=(0, 0.04, -0.62))
+    neck = obj_from_bm("Cuello", b, M["dark"], smooth=True)
+    bv = neck.modifiers.new("Bevel", "BEVEL")
+    bv.width, bv.segments, bv.harden_normals, bv.limit_method = 0.01, 2, True, "ANGLE"
+    extras.append(neck)
+    return extras
+
+
+def build_head(M, paso):
+    o = obj_from_bm(f"Cabeza_{paso:02d}", head_bm(paso), M["armor"], smooth=paso >= 3)
+    o.data.materials.append(mat("Visor", (0.1, 0.5, 1.0), 0, 0.15, (0.1, 0.55, 1.0), 6))
+    if paso >= 3:
+        subsurf(o)
+    return o
+
+
+def lesson4():
+    reset()
+    M = MATS()
+    workbench()
+    camera((1.9, -2.5, 1.6), (0, 0, 0), 32)
+    cubes = concept_cubes()
+    for key, o in cubes.items():
+        hide(list(cubes.values()))
+        hide([o], False)
+        w = wire_overlay(o, 0.006)  # la «jaula»: la malla real, sin subdividir
+        render(f"l4_cubo_{key}")
+        bpy.data.objects.remove(w)
+        e = edge_object(o)
+        export_glb(f"cubo_{key}", [o, e])
+        bpy.data.objects.remove(e)
+
+    names = ["bloque", "forma", "subdivision", "visor", "apoyos", "final"]
+    for i, nm in enumerate(names, start=1):
+        reset()
+        M = MATS()
+        workbench()
+        camera((1.25, -2.35, 0.75), (0, 0, -0.08 if i == 6 else 0), 40)
+        o = build_head(M, min(i, 5))
+        extras = head_extras(M) if i == 6 else []
+        w = wire_overlay(o, 0.004)
+        render(f"l4_{i:02d}_{nm}")
+        if i >= 4:
+            hide([w])
+            render(f"l4_{i:02d}_{nm}_limpio")
+        hide([w])
+        e = edge_object(o)
+        export_glb(f"cabeza_{i:02d}", [o, e] + extras)
+        if i == 6:
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "cabeza_robot.blend"))
+
+
+def lesson4_eevee():
+    reset()
+    M = MATS()
+    studio(M)
+    eevee()
+    o = build_head(M, 5)
+    pivot = bpy.data.objects.new("Soporte", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    for ob in [o] + head_extras(M):
+        ob.parent = pivot
+    pivot.location = (0, 0, 0.83)
+    pivot.rotation_euler = (0, 0, math.radians(-18))
+    b = bmesh.new()
+    bmesh.ops.create_cone(b, cap_ends=True, segments=48, radius1=0.5, radius2=0.45, depth=0.04)
+    bmesh.ops.translate(b, verts=b.verts, vec=(0, 0, 0.02))
+    obj_from_bm("Peana", b, M["dark"], smooth=True)
+    camera((1.45, -4.3, 1.35), (0, 0, 0.88), 72)
+    render("l4_eevee", 1600, 900)
+
+
+if MODE == "m4":
+    lesson4()
+    lesson4_eevee()
 if MODE == "m3e":
     lesson3_eevee()
 if MODE == "m3":

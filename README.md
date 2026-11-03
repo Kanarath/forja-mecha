@@ -12,7 +12,7 @@ Cada módulo termina con una pieza hecha en Blender. Las imágenes y los modelos
 | 01 | Celda de energía | ✅ |
 | 02 | Sombreado limpio | ✅ |
 | 03 | Placa de blindaje (booleanos) | ✅ |
-| 04 | Cabeza de robot (subdivisión) | 🔨 |
+| 04 | Cabeza de robot (subdivisión) | ✅ |
 | 05 | Placa base sci-fi (kitbash) | 🔨 |
 | 06 | Espada-arma (diseño de formas) | 🔨 |
 | 07 | Brazo robótico (mecánica y rigging) | 🔨 |
