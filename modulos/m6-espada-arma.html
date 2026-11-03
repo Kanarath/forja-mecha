@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>06 · Espada-arma · Forja Mecha</title>
+  <meta name="description" content="Diseña y modela una espada-arma estilo mecha en Blender: silueta, blockout, perfiles extruidos, capas de detalle y lenguaje de formas.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m6-espada-arma">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 06</div>
+      <h1>Espada-arma</h1>
+      <p style="color:var(--muted);max-width:680px">Tu arma de referencia, la espada con mecanismo, celda de energía y luces. Por primera vez el reto no es solo técnico: es de <strong>diseño</strong>. Aprenderás el proceso que usan los artistas de conceptos: silueta, blockout, formas, capas de detalle y acabado.</p>
+      <div class="meta"><span>~3 horas</span><span>Nivel: medio</span><span>Herramientas: perfiles extruidos · Solidify · capas · todo lo anterior</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#proceso">El proceso de diseño</a>
+      <a href="#silueta">La silueta manda</a>
+      <a href="#formas">Lenguaje de formas</a>
+      <a href="#visor">El arma en 3D</a>
+      <a href="#p1">1 · Referencias</a>
+      <a href="#p2">2 · Blockout</a>
+      <a href="#p3">3 · Perfiles</a>
+      <a href="#p4">4 · Capas de detalle</a>
+      <a href="#p5">5 · Acabado</a>
+      <a href="#reparto">Reparto del detalle</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l6_eevee.webp" alt="Espada-arma negra con líneas rojas brillantes, luces azules, engranaje y celda de energía en la culata" loading="lazy">
+          <figcaption>Hoja con ventana de energía, líneas rojas y luces azules discontinuas; mecanismo con engranaje y pistón; empuñadura y, en la culata, la celda de energía del módulo 1.</figcaption>
+        </figure>
+        <p>Esta pieza reúne todo lo que has aprendido: Inset/Extrude, booleanos, Array, floaters, Bevel + Weighted Normal y tu propio kit. Lo nuevo es <strong>cómo decidir</strong> qué modelar y dónde.</p>
+      </section>
+
+      <section id="proceso">
+        <h2>El proceso de diseño <span class="tag">// concepto</span></h2>
+        <div class="grid c3">
+          <div class="card"><div class="num">01</div><h3>Silueta</h3><p>¿Se reconoce en negro, sin detalles? Si no, nada lo salvará.</p></div>
+          <div class="card"><div class="num">02</div><h3>Blockout</h3><p>Cajas y cilindros para decidir proporciones. Rápido y sin apego.</p></div>
+          <div class="card"><div class="num">03</div><h3>Formas</h3><p>Perfiles definitivos: chaflanes, ángulos y transiciones.</p></div>
+          <div class="card"><div class="num">04</div><h3>Detalle</h3><p>Capas, paneles, luces y mecanismos, con intención (módulo 5).</p></div>
+          <div class="card"><div class="num">05</div><h3>Acabado</h3><p>Bevel, materiales y luz.</p></div>
+          <div class="card"><div class="num">↺</div><h3>Iterar</h3><p>Volver atrás es normal. Por eso trabajamos de forma no destructiva.</p></div>
+        </div>
+        <div class="note warn"><p><strong>El error de principiante:</strong> empezar por el detalle. Modelar tornillos durante horas en una pieza cuyas proporciones no funcionan. Avanza por fases y no pases a la siguiente hasta que la anterior se lea bien.</p></div>
+      </section>
+
+      <section id="silueta">
+        <h2>La silueta manda <span class="tag">// diseño</span></h2>
+        <div class="compare">
+          <img src="../assets/img/l6_silueta_bloque.webp" alt="Silueta negra del blockout">
+          <div class="after"><img src="../assets/img/l6_silueta_final.webp" alt="Silueta negra del arma final"></div>
+          <div class="handle"></div>
+          <span class="lab l">BLOCKOUT</span><span class="lab r">FINAL</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar silueta del blockout y final">
+        </div>
+        <p>Las dos siluetas tienen la <strong>misma estructura</strong>: hoja larga, cuerpo alto, empuñadura fina y culata. El blockout ya «funcionaba». El trabajo posterior solo refina: la punta, el escalón de la hoja, los chaflanes del cuerpo, el pistón superior y la ventana de luz, que rompe la masa negra de la hoja.</p>
+        <div class="note tip"><p><strong>Modo silueta en Blender:</strong> menú <em>Shading</em> del visor → Lighting <strong>Flat</strong>, Color <strong>Single</strong> en negro y Background <strong>Viewport</strong> en gris claro. Alterna a este modo cada poco rato mientras diseñas.</p></div>
+      </section>
+
+      <section id="formas">
+        <h2>Lenguaje de formas <span class="tag">// diseño</span></h2>
+        <p>Las formas básicas transmiten sensaciones. Un diseño coherente elige un lenguaje y lo repite:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Forma</th><th>Transmite</th><th>En esta arma</th></tr>
+            <tr><td><strong>Triángulo / punta</strong></td><td>Peligro, agresividad, dirección</td><td>La punta de la hoja y los escalones a 45°.</td></tr>
+            <tr><td><strong>Rectángulo / chaflán</strong></td><td>Tecnología, solidez, fabricación</td><td>El cuerpo, las placas y el hexágono alargado que se repite en la ventana y en cada luz.</td></tr>
+            <tr><td><strong>Círculo</strong></td><td>Mecánica, movimiento, energía</td><td>El engranaje, la empuñadura, el pistón y la celda. Todo lo que «funciona» es redondo.</td></tr>
+          </table>
+        </div>
+        <div class="note why"><p><strong>Repetir un motivo</strong> (aquí, el hexágono alargado) hace que piezas distintas parezcan parte del mismo diseño. Lo mismo que hiciste con tu kit en el módulo 5, pero a escala de arma.</p></div>
+      </section>
+
+      <section id="visor">
+        <h2>Gírala paso a paso <span class="tag">// 3D</span></h2>
+        <forja-visor data-malla="off" data-vista="0.15,0.25,1" data-distancia="1.0"
+          data-modelos="arma_01,arma_02,arma_03,arma_04"
+          data-etiquetas="1 Blockout|2 Formas|3 Detalle|4 Final"
+          data-notas="Blockout: cinco cajas y un cilindro. Ya se lee como arma.|Formas: perfiles dibujados con vértices y extruidos.|Capas: placas, líneas rojas, ventana, luces, engranaje, pistón y celda.|Acabado: Bevel en todo. Gíralo y fíjate en el grosor de las capas."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Referencias y boceto</h3></div>
+          <ol>
+            <li>Reúne referencias (tu imagen, armas de anime, herramientas reales, maquinaria). <strong>PureRef</strong> es un programa gratuito para tenerlas todas en un tablero.</li>
+            <li>Haz un boceto de la silueta en papel o en 2D. No hace falta que sea bonito: busca proporciones.</li>
+            <li>En Blender, vista frontal ortográfica (<kbd>Num 1</kbd>) → <kbd>Shift</kbd>+<kbd>A</kbd> → Image → <strong>Reference</strong> y carga tu boceto. Ponle opacidad baja en sus propiedades.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Blockout</h3></div>
+          <figure><img src="../assets/img/l6_01_blockout.webp" alt="Blockout del arma hecho con cajas" loading="lazy"></figure>
+          <ol>
+            <li>Una caja por gran masa: hoja (2.6 × 0.1 × 0.54), cuerpo (0.92 × 0.22 × 0.68), empuñadura (cilindro), culata y bastidor inferior. Usa el panel <kbd>N</kbd> → Dimensions.</li>
+            <li>Ponle a cada caja un nombre en el Outliner. Con decenas de piezas, «Cube.037» no te dirá nada.</li>
+            <li>Comprueba la silueta y las proporciones. Prueba variantes duplicando la colección (<kbd>Shift</kbd>+<kbd>D</kbd>): hoja más ancha, empuñadura más larga… y quédate con la mejor.</li>
+          </ol>
+          <div class="note tip"><p><strong>Escala real:</strong> esta arma mide unos 4,5 m porque es para un mecha. Si fuera para un humano, todo cambiaría: grosores, tamaño de los tornillos, número de detalles. Decide la escala en el blockout.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Formas: perfiles extruidos</h3></div>
+          <figure><img src="../assets/img/l6_02_formas.webp" alt="Arma con perfiles definitivos de hoja y cuerpo" loading="lazy"></figure>
+          <p>Las armas y las piezas planas se modelan dibujando su <strong>perfil</strong> en vista lateral y dándole grosor:</p>
+          <ol>
+            <li>Vista frontal (<kbd>Num 1</kbd>). Añade un plano, entra en modo edición, selecciona todo y bórralo (<kbd>X</kbd> → Vertices). Te queda un objeto vacío.</li>
+            <li>Con <kbd>Ctrl</kbd>+clic derecho vas añadiendo vértices conectados: calca el contorno de la hoja (punta, escalón, base). Activa el imán a la rejilla (<kbd>Shift</kbd>+<kbd>Tab</kbd>, <em>Increment</em>) para que los ángulos te queden limpios.</li>
+            <li>Cierra el contorno (selecciona el primer y el último vértice y pulsa <kbd>F</kbd>), después <kbd>A</kbd> y <kbd>F</kbd> otra vez para crear la cara.</li>
+            <li>En modo objeto, modificador <strong>Solidify</strong>: <strong>Thickness 0.1</strong>, <strong>Offset 0</strong>. El grosor queda centrado y puedes cambiarlo cuando quieras.</li>
+            <li>Repite con el cuerpo (grosor 0.22), el bastidor y el gatillo.</li>
+          </ol>
+          <div class="note why"><p><strong>¿Por qué un perfil + Solidify?</strong> El contorno es lo que define el diseño, y así lo editas en 2D, que es mucho más fácil. El grosor es un número que puedes ajustar en cualquier momento.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Capas de detalle</h3></div>
+          <figure><img src="../assets/img/l6_03_detalle.webp" alt="Arma con placas, líneas rojas, luces, ventana, engranaje, pistón y celda" loading="lazy"></figure>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Capa</th><th>Técnica</th></tr>
+              <tr><td><strong>Placa interior</strong></td><td>Duplica la cara del perfil (<kbd>Shift</kbd>+<kbd>D</kbd> en modo edición), <kbd>I</kbd> <code>0.06</code>, borra el anillo exterior y separa lo que queda con <kbd>P</kbd> → Selection. Dale un Solidify un poco más grueso que la hoja: sobresale y crea una capa.</td></tr>
+              <tr><td><strong>Línea roja</strong></td><td>Otra copia del perfil con dos Inset seguidos (<code>0.032</code> y <code>0.012</code>). Quédate solo con el anillo fino del medio, dale un Solidify mínimo y un material emisivo rojo. Va en el canal que queda entre el borde y la placa.</td></tr>
+              <tr><td><strong>Ventana de energía</strong></td><td>Cortador booleano (módulo 3) con forma de hexágono alargado que atraviesa hoja y placa. Dentro, una barra emisiva azul algo más pequeña.</td></tr>
+              <tr><td><strong>Luces discontinuas</strong></td><td>Un guion hexagonal + <strong>Array</strong> (6 copias) + <strong>Mirror</strong> en Y para el otro lado (módulo 3).</td></tr>
+              <tr><td><strong>Engranaje</strong></td><td>Gratis con la extensión <strong>Extra Mesh Objects</strong> (módulo 0): <kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → Extras → <strong>Gear</strong>. Con un eje cilíndrico que lo atraviesa.</td></tr>
+              <tr><td><strong>Pistón</strong></td><td>Camisa oscura + vástago claro más fino sobre un riel, con dos soportes. En el módulo 7 aprenderás a hacer que se mueva.</td></tr>
+              <tr><td><strong>Celda</strong></td><td>¡La del módulo 1! <code>File → Append</code> → <code>celda_energia.blend</code> → Object, o arrástrala desde tu biblioteca del Asset Browser (módulo 5).</td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Acabado</h3></div>
+          <figure><img src="../assets/img/l6_04_final.webp" alt="Arma terminada con biseles" loading="lazy"></figure>
+          <ol>
+            <li>Bevel (Angle, Harden Normals) + Shade Smooth en todas las piezas. Truco: selecciona todas, configura una, y con la activa usa <kbd>Ctrl</kbd>+<kbd>L</kbd> → <strong>Copy Modifiers</strong>.</li>
+            <li>Materiales: negro mate (Roughness alta) para el cuerpo y grafito metálico para la hoja. Así se distinguen aunque los dos sean oscuros.</li>
+            <li>Emisivos: rojo para las líneas (Strength ~6) y azul para la ventana y las luces (~9).</li>
+            <li>Renderiza con el estudio del módulo 0. Con objetos tan oscuros, la <strong>contraluz</strong> es la que dibuja los bordes.</li>
+          </ol>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>espada_arma.blend</strong><small>El arma completa con todas las capas como objetos separados y el cortador de la ventana activo.</small></div>
+            <a class="btn small ghost" href="../assets/blend/espada_arma.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="reparto">
+        <h2>Reparto del detalle <span class="tag">// diseño</span></h2>
+        <p>Mira de nuevo el render final: <strong>la mitad izquierda es casi lisa</strong> (una placa, una ventana y una fila de luces) y <strong>el detalle se concentra a la derecha</strong>, en el mecanismo: engranaje, pistón, empuñadura y celda. Es lo mismo que pasa en tu imagen de referencia.</p>
+        <ul>
+          <li>La zona lisa hace que la zona detallada destaque, y viceversa.</li>
+          <li>El detalle va donde «hay mecánica»: es creíble que ahí haya piezas.</li>
+          <li>Las líneas rojas recorren toda el arma y la unifican visualmente.</li>
+        </ul>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu arma <span class="tag">// checklist</span></h2>
+        <p>Diseña <strong>tu propia</strong> arma mecha siguiendo el proceso completo. Ideas: un hacha-cañón, una lanza con batería, un escudo con una hoja retráctil o un rifle con bayoneta.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="boceto"><span>Boceto de silueta y referencias en el fondo</span></label></li>
+          <li><label><input type="checkbox" data-id="blockout"><span>Blockout con al menos dos variantes comparadas</span></label></li>
+          <li><label><input type="checkbox" data-id="silueta"><span>He comprobado la silueta en modo Flat + negro</span></label></li>
+          <li><label><input type="checkbox" data-id="perfiles"><span>Formas hechas con perfiles + Solidify</span></label></li>
+          <li><label><input type="checkbox" data-id="lenguaje"><span>Un motivo de forma repetido en varias piezas</span></label></li>
+          <li><label><input type="checkbox" data-id="capas"><span>Al menos 3 capas de detalle (placa, línea, luces…)</span></label></li>
+          <li><label><input type="checkbox" data-id="reutilizar"><span>Reutilicé una pieza de módulos anteriores (Append o Asset Browser)</span></label></li>
+          <li><label><input type="checkbox" data-id="reparto"><span>Hay zonas de descanso y una zona de detalle clara</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Render final con contraluz</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>
