@@ -566,11 +566,11 @@ def plate_base(M):
     return obj_from_bm("Placa", bm, M["armor"])
 
 
-def bolt(name, x, y, M):
+def bolt(name, x, y, M, z=0.16):
     bm = bmesh.new()
     bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=12,
                           radius1=0.035, radius2=0.035, depth=0.025)
-    bmesh.ops.translate(bm, verts=bm.verts, vec=(x, y, 0.16 + 0.0125))
+    bmesh.ops.translate(bm, verts=bm.verts, vec=(x, y, z + 0.0125))
     bm.normal_update()
     top = max((f for f in bm.faces if f.normal.z > 0.99), key=lambda f: f.calc_center_median().z)
     bmesh.ops.inset_individual(bm, faces=[top], thickness=0.012, depth=-0.008)
@@ -884,6 +884,289 @@ def lesson4_eevee():
     render("l4_eevee", 1600, 900)
 
 
+# ------------------------------------------- Lección 5: placa base sci-fi
+
+import random
+
+
+def prism_bm(pts, z0, z1):
+    bm = bmesh.new()
+    vs = [bm.verts.new((x, y, z0)) for x, y in pts]
+    f = bm.faces.new(vs)
+    r = bmesh.ops.extrude_face_region(bm, geom=[f])
+    top = [v for v in r["geom"] if isinstance(v, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=top, vec=(0, 0, z1 - z0))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
+def top_face(bm):
+    bm.normal_update()
+    return max((f for f in bm.faces if f.normal.z > 0.99), key=lambda f: f.calc_center_median().z)
+
+
+def bevel_mod(o, w=0.006, seg=2):
+    for p in o.data.polygons:
+        p.use_smooth = True
+    b = o.modifiers.new("Bevel", "BEVEL")
+    b.width, b.segments, b.harden_normals = w, seg, True
+    b.limit_method = "ANGLE"
+    b.angle_limit = math.radians(30)
+    return o
+
+
+def box_pts(sx, sy, cx=0, cy=0):
+    return [(cx - sx / 2, cy - sy / 2), (cx + sx / 2, cy - sy / 2), (cx + sx / 2, cy + sy / 2), (cx - sx / 2, cy + sy / 2)]
+
+
+def place(objs, loc, rot_z=0, parent_name="Pieza"):
+    """Agrupa las partes de una pieza bajo un Empty y la coloca: así se mueve como un todo."""
+    e = bpy.data.objects.new(parent_name, None)
+    bpy.context.scene.collection.objects.link(e)
+    for o in objs:
+        o.parent = e
+    e.location = loc
+    e.rotation_euler = (0, 0, rot_z)
+    return e
+
+
+def kit_mats():
+    return {
+        "pcb": mat("Placa PCB", (0.075, 0.08, 0.09), 0.5, 0.45),
+        "shell": mat("Carcasa", (0.24, 0.25, 0.27), 0.55, 0.35),
+        "naranja": mat("Cable naranja", (0.85, 0.3, 0.05), 0, 0.45),
+        "azul": mat("Cable azul", (0.05, 0.28, 0.85), 0, 0.45),
+        "cobre": mat("Cable cobre", (0.75, 0.42, 0.22), 0.8, 0.35),
+        "led": mat("LED", (0.2, 0.7, 1.0), 0, 0.2, (0.15, 0.6, 1.0), 12),
+    }
+
+
+def piece_core(M, K):
+    bm = prism_bm(chamfer_rect(-0.5, 0.5, -0.5, 0.5, 0.18), 0, 0.3)
+    t = top_face(bm)
+    bmesh.ops.inset_individual(bm, faces=[t], thickness=0.08, depth=0)
+    extrude_move(bm, [t], (0, 0, -0.04))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    parts = [bevel_mod(obj_from_bm("Nucleo_base", bm, M["armor"]), 0.008)]
+    bm = prism_bm(chamfer_rect(-0.2, 0.2, -0.2, 0.2, 0.04), 0.26, 0.3)
+    parts.append(bevel_mod(obj_from_bm("Nucleo_chip", bm, K["shell"]), 0.004))
+    bm = prism_bm(chamfer_rect(-0.12, 0.12, -0.12, 0.12, 0.02), 0.3, 0.31)
+    parts.append(obj_from_bm("Nucleo_luz", bm, K["led"]))
+    for i in range(4):  # aletas en cada lado recto: una aleta + Array
+        bm = prism_bm(box_pts(0.05, 0.02, 0.525, -0.21), 0.05, 0.23)
+        f = bevel_mod(obj_from_bm(f"Nucleo_aletas_{i}", bm, K["shell"]), 0.003)
+        a = f.modifiers.new("Array", "ARRAY")
+        a.count, a.use_relative_offset, a.use_constant_offset = 7, False, True
+        a.constant_offset_displace = (0, 0.07, 0)
+        f.modifiers.move(len(f.modifiers) - 1, 0)
+        f.rotation_euler = (0, 0, math.radians(90 * i))
+        parts.append(f)
+    return parts
+
+
+def piece_module(M, K):
+    bm = prism_bm(chamfer_rect(-0.21, 0.21, -0.16, 0.16, 0.05, (0, 1, 0, 1)), 0, 0.14)
+    t = top_face(bm)
+    bmesh.ops.inset_individual(bm, faces=[t], thickness=0.03, depth=0)
+    extrude_move(bm, [t], (0, 0, -0.015))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    parts = [bevel_mod(obj_from_bm("Modulo_caja", bm, K["shell"]), 0.005)]
+    parts.append(obj_from_bm("Modulo_led", prism_bm(box_pts(0.05, 0.05, -0.12, 0.08), 0.12, 0.13), K["led"]))
+    parts.append(bevel_mod(obj_from_bm("Modulo_puerto", prism_bm(box_pts(0.06, 0.12, 0.24, 0), 0.02, 0.09), M["dark"]), 0.004))
+    return parts
+
+
+def piece_connector(M, K):
+    parts = [bevel_mod(obj_from_bm("Conector", prism_bm(chamfer_rect(-0.1, 0.1, -0.06, 0.06, 0.02), 0, 0.06), M["armor"]), 0.004)]
+    s = obj_from_bm("Conector_ranuras", prism_bm(box_pts(0.025, 0.07, -0.06, 0), 0.055, 0.07), M["dark"])
+    a = s.modifiers.new("Array", "ARRAY")
+    a.count, a.use_relative_offset, a.use_constant_offset = 4, False, True
+    a.constant_offset_displace = (0.04, 0, 0)
+    parts.append(s)
+    return parts
+
+
+def piece_heatsink(M, K):
+    parts = [bevel_mod(obj_from_bm("Disipador_base", prism_bm(box_pts(0.3, 0.3), 0, 0.03), M["dark"]), 0.004)]
+    f = bevel_mod(obj_from_bm("Disipador_aletas", prism_bm(box_pts(0.012, 0.28, -0.136, 0), 0.03, 0.13), M["armor"]), 0.002)
+    a = f.modifiers.new("Array", "ARRAY")
+    a.count, a.use_relative_offset, a.use_constant_offset = 9, False, True
+    a.constant_offset_displace = (0.034, 0, 0)
+    f.modifiers.move(len(f.modifiers) - 1, 0)
+    parts.append(f)
+    return parts
+
+
+def cable(name, pts, material, r=0.022):
+    cu = bpy.data.curves.new(name, "CURVE")
+    cu.dimensions = "3D"
+    cu.bevel_depth = r
+    cu.bevel_resolution = 3
+    cu.use_fill_caps = True
+    sp = cu.splines.new("BEZIER")
+    sp.bezier_points.add(len(pts) - 1)
+    for bp, p in zip(sp.bezier_points, pts):
+        bp.co = p
+        bp.handle_left_type = bp.handle_right_type = "AUTO"
+    o = bpy.data.objects.new(name, cu)
+    bpy.context.scene.collection.objects.link(o)
+    cu.materials.append(material)
+    return o
+
+
+# módulos alrededor del núcleo: (posición, giro que apunta su puerto al núcleo, punto de entrada en el núcleo)
+SLOTS = [((-1.45, y, 0.1), 0, (-0.5, y * 0.35)) for y in (-0.75, 0, 0.75)] + \
+        [((1.45, y, 0.1), math.pi, (0.5, y * 0.35)) for y in (-0.75, 0, 0.75)] + \
+        [((x, 1.05, 0.1), -math.pi / 2, (x * 0.35, 0.5)) for x in (-0.75, 0.75)] + \
+        [((x, -1.05, 0.1), math.pi / 2, (x * 0.35, -0.5)) for x in (-0.75, 0.75)]
+
+
+def board(M, K):
+    bm = prism_bm(chamfer_rect(-2.0, 2.0, -1.4, 1.4, 0.3), 0, 0.12)
+    t = top_face(bm)
+    bmesh.ops.inset_individual(bm, faces=[t], thickness=0.1, depth=0)
+    extrude_move(bm, [t], (0, 0, -0.02))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bevel_mod(obj_from_bm("Placa_base", bm, K["pcb"]), 0.008)
+
+
+def build_board(M, K, paso, ruido=False):
+    objs = [board(M, K)]
+    if paso >= 2:
+        objs += piece_core(M, K)
+        place(objs[1:], (0, 0, 0.1), 0, "Nucleo")
+        for i, (loc, rz, _) in enumerate(SLOTS):
+            parts = piece_module(M, K)
+            place(parts, loc, rz, f"Modulo_{i}")
+            objs += parts
+    if paso >= 3:
+        colores = [K["naranja"], K["azul"], K["cobre"]]
+        for i, (loc, rz, entrada) in enumerate(SLOTS):
+            d = Vector((math.cos(rz), math.sin(rz), 0))
+            n = Vector((-d.y, d.x, 0))
+            tip = Vector(loc) + d * 0.27
+            end = Vector((entrada[0], entrada[1], 0)) + d * -0.04  # entra bajo las aletas
+            for k in (-1, 0, 1):
+                a = Vector((tip.x, tip.y, 0.155)) + n * 0.034 * k
+                b = Vector((end.x, end.y, 0.135)) + n * 0.05 * k
+                pts = [a, a + d * 0.12 + Vector((0, 0, -0.02)), (a + b) / 2 + Vector((0, 0, -0.012)), b - d * 0.12, b]
+                objs.append(cable(f"Cable_{i}_{k + 1}", pts, colores[k + 1]))
+            mid = (tip + end) / 2
+            clamp = bevel_mod(obj_from_bm(f"Abrazadera_{i}", prism_bm(box_pts(0.05, 0.2), 0.1, 0.18), M["armor"]), 0.004)
+            clamp.location = (mid.x, mid.y, 0)
+            clamp.rotation_euler = (0, 0, rz)
+            objs.append(clamp)
+    if paso >= 4 and not ruido:
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                parts = piece_heatsink(M, K)
+                place(parts, (1.6 * sx, 1.12 * sy, 0.1), 0, "Disipador")
+                objs += parts
+            for sy in (-1, 1):
+                objs.append(bolt(f"Tornillo_{sx}{sy}", 1.94 * sx, 0.95 * sy, M, z=0.12))
+        for y in (1.12, -1.12):
+            parts = piece_connector(M, K)
+            place(parts, (0, y, 0.1), 0, "Conector")
+            objs += parts
+    if ruido:
+        rnd = random.Random(7)
+        for i in range(46):
+            kind = rnd.choice([piece_connector, piece_heatsink, piece_connector])
+            parts = kind(M, K)
+            z = rnd.choice([0.1, 0.1, 0.24, 0.4])
+            place(parts, (rnd.uniform(-1.8, 1.8), rnd.uniform(-1.2, 1.2), z), rnd.uniform(0, 6.3), "Ruido")
+            objs += parts
+    return objs
+
+
+def mesh_copies(objs):
+    """Copias en malla (las curvas de los cables también) para exportar al .glb."""
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    out = []
+    for o in objs:
+        if o.type not in ("MESH", "CURVE"):
+            continue
+        me = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
+        c = bpy.data.objects.new(o.name + "_glb", me)
+        bpy.context.scene.collection.objects.link(c)
+        c.matrix_world = o.matrix_world.copy()
+        out.append(c)
+    return out
+
+
+def label(text, loc, size=0.11):
+    cu = bpy.data.curves.new("Etiqueta", "FONT")
+    cu.body = text
+    cu.size = size
+    cu.align_x = "CENTER"
+    o = bpy.data.objects.new("Etiqueta", cu)
+    bpy.context.scene.collection.objects.link(o)
+    o.location = loc
+    cu.materials.append(mat("Texto", (0.85, 0.88, 0.92)))
+    return o
+
+
+def lesson5():
+    reset()
+    M = MATS()
+    K = kit_mats()
+    workbench()
+    camera((0.15, -4.9, 3.1), (0.15, 0.0, 0.1), 38)
+    kit = [(piece_core, "NÚCLEO", -1.55, 1), (piece_module, "MÓDULO", -0.35, 1.4), (piece_connector, "CONECTOR", 0.45, 1.6),
+           (piece_heatsink, "DISIPADOR", 1.2, 1.4)]
+    allp = []
+    for fn, name, x, s in kit:
+        parts = fn(M, K)
+        e = place(parts, (x, 0.15, 0), 0, name)
+        e.scale = (s, s, s)
+        allp += parts
+        label(name, (x, -0.65, 0))
+    t = bolt("Tornillo", 0, 0, M, z=0)
+    t.scale = (2.5, 2.5, 2.5)
+    t.location = (1.85, 0.15, 0)
+    allp.append(t)
+    label("TORNILLO", (1.85, -0.65, 0))
+    render("l5_01_kit")
+    export_glb("kit", mesh_copies(allp))
+
+    names = {1: "base", 2: "colocar", 3: "cables", 4: "final"}
+    for paso, nm in names.items():
+        reset()
+        M = MATS()
+        K = kit_mats()
+        workbench()
+        camera((2.9, -4.1, 3.7), (0, -0.1, 0), 35)
+        objs = build_board(M, K, paso)
+        render(f"l5_{paso + 1:02d}_{nm}")
+        export_glb(f"placabase_{paso:02d}", mesh_copies(objs))
+        if paso == 4:
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "placa_base_kitbash.blend"))
+    reset()
+    M = MATS()
+    K = kit_mats()
+    workbench()
+    camera((2.9, -4.1, 3.7), (0, -0.1, 0), 35)
+    build_board(M, K, 3, ruido=True)
+    render("l5_ruido")
+
+
+def lesson5_eevee():
+    reset()
+    M = MATS()
+    K = kit_mats()
+    studio(M)
+    eevee()
+    objs = build_board(M, K, 4)
+    camera((2.4, -3.6, 3.0), (0.05, -0.05, 0.1), 32)
+    render("l5_eevee", 1600, 900)
+
+
+if MODE == "m5w":
+    lesson5()
+if MODE == "m5":
+    lesson5()
+    lesson5_eevee()
 if MODE == "m4":
     lesson4()
     lesson4_eevee()

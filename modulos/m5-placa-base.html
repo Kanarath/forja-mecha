@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>05 · Placa base sci-fi · Forja Mecha</title>
+  <meta name="description" content="Kitbash y greebles en Blender: crea tu propia biblioteca de piezas con el Asset Browser, cables con curvas y una placa base sci-fi con jerarquía de detalle.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m5-placa-base">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 05</div>
+      <h1>Placa base sci-fi</h1>
+      <p style="color:var(--muted);max-width:680px">Tu imagen de la placa con el núcleo brillante y los cables es puro <strong>kitbash</strong>: pocas piezas bien hechas, repetidas y combinadas con intención. Aquí crearás tu propio kit de piezas y aprenderás a repartir el detalle para que el conjunto se lea, en vez de convertirse en ruido.</p>
+      <div class="meta"><span>~2,5 horas</span><span>Nivel: medio</span><span>Herramientas: Asset Browser · Curvas · Array · Snapping</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#concepto">Kitbash y greebles</a>
+      <a href="#visor">La placa en 3D</a>
+      <a href="#p1">1 · Tu kit</a>
+      <a href="#p2">2 · Biblioteca</a>
+      <a href="#p3">3 · La placa</a>
+      <a href="#p4">4 · Colocar piezas</a>
+      <a href="#p5">5 · Cables</a>
+      <a href="#p6">6 · Greebles con cabeza</a>
+      <a href="#jerarquia">Jerarquía de detalle</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l5_eevee.webp" alt="Placa base sci-fi con núcleo central brillante, módulos con LEDs y cables naranjas y azules" loading="lazy">
+          <figcaption>Un núcleo, diez módulos, cables y unos pocos greebles. Solo hay <strong>4 piezas distintas</strong>: todo lo demás son copias.</figcaption>
+        </figure>
+        <p>Aprenderás:</p>
+        <ul>
+          <li>Diseñar un <strong>kit</strong> de piezas reutilizables.</li>
+          <li>Guardarlas en una <strong>biblioteca</strong> con el Asset Browser y arrastrarlas a cualquier proyecto.</li>
+          <li>Hacer <strong>cables</strong> con curvas Bézier.</li>
+          <li>Repartir el detalle con <strong>jerarquía y zonas de descanso</strong>.</li>
+        </ul>
+      </section>
+
+      <section id="concepto">
+        <h2>Kitbash y greebles <span class="tag">// concepto</span></h2>
+        <div class="grid c2">
+          <div class="card"><h3>Kitbash</h3><p>Construir algo grande combinando piezas ya hechas. El término viene de los maquetistas de cine que «canibalizaban» kits de maquetas para crear naves espaciales.</p></div>
+          <div class="card"><h3>Greebles</h3><p>Detalles pequeños de superficie (conectores, aletas, tornillos) que dan escala y sensación de complejidad. No tienen que «hacer» nada, solo parecer que lo hacen.</p></div>
+        </div>
+        <figure>
+          <img src="../assets/img/l5_01_kit.webp" alt="Catálogo de cinco piezas del kit: núcleo, módulo, conector, disipador y tornillo" loading="lazy">
+          <figcaption>El kit completo de este módulo. Cada pieza usa técnicas que ya conoces: Inset + Extrude (módulo 1), Array (módulo 3) y floaters (módulo 3).</figcaption>
+        </figure>
+        <div class="note free"><p><strong>¿Y los packs de kitbash?</strong> Hay packs gratuitos en internet, pero hacer tu propio kit es parte del aprendizaje y te da un estilo propio. Si algún día usas uno ajeno, revisa siempre la licencia (CC0 es la más libre).</p></div>
+      </section>
+
+      <section id="visor">
+        <h2>Gírala paso a paso <span class="tag">// 3D</span></h2>
+        <forja-visor data-malla="off" data-vista="0.55,1.0,1" data-distancia="1.4"
+          data-modelos="kit,placabase_01,placabase_02,placabase_03,placabase_04"
+          data-etiquetas="Kit|1 Placa|2 Piezas|3 Cables|4 Greebles"
+          data-notas="Las 5 piezas del kit.|La placa: un prisma achaflanado con un marco (Inset + Extrude).|El núcleo en el centro y 10 copias del módulo con el puerto mirando hacia él.|Tres cables por módulo, cada uno de un color, con una abrazadera.|Disipadores en las esquinas, conectores en los huecos y tornillos en el marco. Y nada más."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Modela tu kit</h3></div>
+          <p>Trabaja en un archivo nuevo, <code>kit_mecha.blend</code>. Cada pieza, en su origen (0, 0, 0) y apoyada en el suelo (Z = 0). Así luego encajará fácil en cualquier superficie.</p>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Pieza</th><th>Receta</th></tr>
+              <tr><td><strong>Núcleo</strong></td><td>Prisma achaflanado de 1 × 1 × 0.3 (cubo + <kbd>Ctrl</kbd>+<kbd>B</kbd> en las aristas verticales) → <kbd>I</kbd> 0.08 + <kbd>E</kbd> −0.04 en la tapa. Chip encima con una cara emisiva. Aletas: una placa fina + <strong>Array</strong> de 7 en cada lado.</td></tr>
+              <tr><td><strong>Módulo</strong></td><td>Caja de 0.42 × 0.32 × 0.14 con dos esquinas achaflanadas, tapa con Inset + Extrude, un LED emisivo y un <strong>puerto</strong> oscuro en un lado (por ahí saldrán los cables).</td></tr>
+              <tr><td><strong>Conector</strong></td><td>Caja pequeña achaflanada + una ranura oscura con Array de 4.</td></tr>
+              <tr><td><strong>Disipador</strong></td><td>Base oscura + una aleta fina con Array de 9. Es el greeble más agradecido que existe.</td></tr>
+              <tr><td><strong>Tornillo</strong></td><td>El del módulo 3.</td></tr>
+            </table>
+          </div>
+          <p>Todas las piezas llevan la receta del módulo 2: Shade Smooth + Bevel (Angle, Harden Normals). Así los bordes atrapan la luz incluso a escala pequeña.</p>
+          <div class="note why"><p><strong>Diseña con un lenguaje común.</strong> Fíjate en que todas las piezas comparten chaflanes a 45°, tapas hundidas y el mismo tipo de LED. Por eso parecen de la misma «marca» aunque sean distintas. Es lo que hace que un kit funcione.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Tu biblioteca con el Asset Browser</h3></div>
+          <ol>
+            <li>Agrupa las partes de cada pieza en <strong>su propia colección</strong>: selecciónalas y <kbd>M</kbd> → New Collection (por ejemplo, <code>Modulo</code>).</li>
+            <li>En el Outliner, clic derecho sobre la colección → <strong>Mark as Asset</strong>. Repite con cada pieza.</li>
+            <li>Guarda el archivo en una carpeta fija, por ejemplo <code>Documentos/Kit Mecha/</code>.</li>
+            <li><code>Edit → Preferences → File Paths → Asset Libraries</code> → <strong>+</strong> y elige esa carpeta. Ponle de nombre «Kit Mecha».</li>
+            <li>En cualquier proyecto: cambia un área a <strong>Asset Browser</strong> (menú del tipo de editor, arriba a la izquierda de cada área), elige la biblioteca «Kit Mecha» y <strong>arrastra</strong> las piezas a la escena. Se colocan sobre la superficie que haya bajo el cursor.</li>
+          </ol>
+          <div class="note tip"><p><strong>Es tu inversión a largo plazo.</strong> Cada pieza que hagas en los siguientes módulos (pistones, bisagras, tomas de aire…) puede ir a esta biblioteca. Cuando llegues al androide tendrás decenas de piezas listas para arrastrar.</p></div>
+          <div class="note tip"><p><strong>Miniatura:</strong> en el Asset Browser, clic derecho sobre un asset → <em>Generate Preview</em>, o desde el panel lateral (<kbd>N</kbd>) carga una imagen propia.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>La placa</h3></div>
+          <figure><img src="../assets/img/l5_02_base.webp" alt="Placa base oscura con marco" loading="lazy"></figure>
+          <ol>
+            <li>Cubo con Dimensions <code>4</code> × <code>2.8</code> × <code>0.12</code> → <kbd>Ctrl</kbd>+<kbd>A</kbd>.</li>
+            <li>Chaflán de <code>0.3</code> en las 4 aristas verticales (como la placa del módulo 3).</li>
+            <li>Tapa: <kbd>I</kbd> <code>0.1</code> y <kbd>E</kbd> <code>-0.02</code>: queda un marco con el campo hundido.</li>
+            <li>Material oscuro, casi negro, con Metallic 0.5: así las piezas grises y los cables de color resaltan.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Colocar piezas</h3></div>
+          <figure><img src="../assets/img/l5_03_colocar.webp" alt="Núcleo en el centro y diez módulos alrededor" loading="lazy"></figure>
+          <ol>
+            <li>Arrastra el <strong>núcleo</strong> al centro. Es el <em>punto focal</em>: lo más grande, lo más claro y lo único que brilla fuerte.</li>
+            <li>Arrastra un <strong>módulo</strong>, gíralo (<kbd>R</kbd> <kbd>Z</kbd> <code>90</code>) para que su puerto mire al núcleo y duplícalo con <kbd>Shift</kbd>+<kbd>D</kbd>: tres a cada lado y dos arriba y abajo.</li>
+            <li>Para apoyar piezas sobre superficies inclinadas: activa el imán (<kbd>Shift</kbd>+<kbd>Tab</kbd>), modo <strong>Face Project</strong> y <strong>Align Rotation to Target</strong>.</li>
+          </ol>
+          <div class="note why"><p><strong>Orden visual:</strong> los módulos están en filas y columnas, y todos miran al centro. Esa disposición hace que la placa parezca diseñada por ingenieros y no tirada al azar. La simetría aproximada da orden. La asimetría pequeña (por ejemplo, dos módulos arriba y tres a los lados) da interés.</p></div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Cables con curvas</h3></div>
+          <figure><img src="../assets/img/l5_04_cables.webp" alt="Cables naranjas y azules conectando módulos y núcleo" loading="lazy"></figure>
+          <ol>
+            <li><kbd>Shift</kbd>+<kbd>A</kbd> → Curve → <strong>Bezier</strong>. En modo edición, coloca el primer punto en el puerto del módulo y el último junto al núcleo. <kbd>E</kbd> extruye puntos nuevos y <kbd>G</kbd> mueve los puntos y sus manejadores.</li>
+            <li>Si los manejadores te dan guerra: selecciona todo y <kbd>V</kbd> → <strong>Automatic</strong>. Blender suaviza la curva por ti.</li>
+            <li>Pestaña de datos de la curva (icono verde) → <em>Geometry → Bevel</em>: <strong>Depth 0.022</strong>, <strong>Resolution 3</strong> y <strong>Fill Caps</strong> ✓. La línea se convierte en un tubo.</li>
+            <li>Duplica el cable (<kbd>Shift</kbd>+<kbd>D</kbd>) y desplázalo un poco a un lado: hazlo tres veces y tendrás un mazo. Un material distinto para cada uno: naranja, azul y cobre.</li>
+            <li>Una <strong>abrazadera</strong> (una caja pequeña con bevel) en mitad del mazo: un floater que hace que los cables parezcan sujetos de verdad.</li>
+          </ol>
+          <div class="note tip"><p><strong>Cables que se apoyan:</strong> haz que el cable baje del puerto al suelo de la placa y vuelva a subir al llegar al núcleo. Los cables flotando en línea recta delatan un modelo 3D. Con la gravedad parecen reales.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Greebles… con cabeza</h3></div>
+          <figure><img src="../assets/img/l5_05_final.webp" alt="Placa final con disipadores en las esquinas, conectores y tornillos" loading="lazy"></figure>
+          <ol>
+            <li>Disipadores en las <strong>4 esquinas</strong>: rellenan zonas vacías y «enmarcan» el conjunto.</li>
+            <li>Dos conectores en los huecos de arriba y abajo.</li>
+            <li>Tornillos en el marco.</li>
+            <li><strong>Para.</strong> En serio. Lo difícil del greeble no es ponerlo, sino saber cuándo dejar de ponerlo.</li>
+          </ol>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>placa_base_kitbash.blend</strong><small>La placa terminada con todas las piezas del kit, los cables como curvas editables y las luces.</small></div>
+            <a class="btn small ghost" href="../assets/blend/placa_base_kitbash.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="jerarquia">
+        <h2>Jerarquía de detalle <span class="tag">// diseño</span></h2>
+        <div class="compare">
+          <img src="../assets/img/l5_ruido.webp" alt="Placa saturada de greebles al azar">
+          <div class="after"><img src="../assets/img/l5_05_final.webp" alt="Placa con greebles colocados con intención"></div>
+          <div class="handle"></div>
+          <span class="lab l">RUIDO</span><span class="lab r">CON INTENCIÓN</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar greebles al azar y con intención">
+        </div>
+        <p>A la izquierda, 46 greebles más tirados al azar: incluso tapan el núcleo y flotan en el aire. Tiene <em>más</em> detalle y se ve <em>peor</em>: el ojo no sabe dónde mirar. A la derecha, unos pocos con intención.</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Principio</th><th>Qué significa</th></tr>
+            <tr><td><strong>Grande · mediano · pequeño</strong></td><td>Primero las formas grandes (placa, núcleo), luego las medianas (módulos) y al final las pequeñas (greebles). Si las pequeñas compiten con las grandes, todo se aplana.</td></tr>
+            <tr><td><strong>Zonas de descanso</strong></td><td>Deja superficies limpias (aproximadamente 70 % de calma y 30 % de detalle). El detalle solo luce si hay vacío a su alrededor. Fíjate en la tapa lisa del núcleo.</td></tr>
+            <tr><td><strong>Punto focal</strong></td><td>Una cosa manda: aquí, el núcleo brillante. Los cables llevan la mirada hacia él.</td></tr>
+            <tr><td><strong>Lógica funcional</strong></td><td>Todo parece hacer algo: los cables van de puerto a puerto, los disipadores están junto a lo que se calienta y los tornillos sujetan placas. Aunque sea inventado, que sea creíble.</td></tr>
+          </table>
+        </div>
+        <div class="note why"><p><strong>Esto vale para el androide y la espada.</strong> Las referencias que te gustan funcionan por esto: la hoja del arma tiene grandes zonas lisas y el detalle concentrado en el mecanismo de la empuñadura.</p></div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu kit y tu placa <span class="tag">// checklist</span></h2>
+        <p>Crea al menos <strong>2 piezas nuevas</strong> para tu kit (por ejemplo, un ventilador circular, un depósito con indicador o una toma de aire) y monta una placa con otra composición: un núcleo descentrado, dos núcleos conectados o una placa alargada para la espalda del androide.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="kit"><span>Kit propio con al menos 5 piezas con el mismo lenguaje de diseño</span></label></li>
+          <li><label><input type="checkbox" data-id="assets"><span>Piezas marcadas como asset en una biblioteca de Preferences</span></label></li>
+          <li><label><input type="checkbox" data-id="arrastrar"><span>He montado la placa arrastrando desde el Asset Browser</span></label></li>
+          <li><label><input type="checkbox" data-id="cables"><span>Cables Bézier con Bevel, en mazos de colores y con abrazaderas</span></label></li>
+          <li><label><input type="checkbox" data-id="gravedad"><span>Los cables bajan a la superficie: no flotan rectos</span></label></li>
+          <li><label><input type="checkbox" data-id="focal"><span>Hay un punto focal claro y zonas de descanso</span></label></li>
+          <li><label><input type="checkbox" data-id="parar"><span>He quitado greebles hasta que el conjunto se lee mejor</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Render con luces emisivas en mi estudio</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@ export const MODULOS = [
   { n: 2, slug: "m2-sombreado", titulo: "Sombreado limpio", desc: "Normales, n-gons, Smooth by Angle, Harden Normals y Weighted Normal.", proyecto: "Módulo técnico sin artefactos", listo: true },
   { n: 3, slug: "m3-placa-blindaje", titulo: "Placa de blindaje", desc: "Booleanos no destructivos, paneles, rejillas y luces incrustadas.", proyecto: "Placa con paneles y luces", listo: true },
   { n: 4, slug: "m4-cabeza-robot", titulo: "Cabeza de robot", desc: "Subdivision Surface y support loops para curvas limpias.", proyecto: "Casco de androide", listo: true },
-  { n: 5, slug: "m5-placa-base", titulo: "Placa base sci-fi", desc: "Kitbash, greebles, cables con curvas y tu biblioteca en el Asset Browser.", proyecto: "Núcleo con módulos y cableado", listo: false },
+  { n: 5, slug: "m5-placa-base", titulo: "Placa base sci-fi", desc: "Kitbash, greebles, cables con curvas y tu biblioteca en el Asset Browser.", proyecto: "Núcleo con módulos y cableado", listo: true },
   { n: 6, slug: "m6-espada-arma", titulo: "Espada-arma", desc: "Blockout, silueta, lenguaje de formas y reparto de detalle.", proyecto: "Gunblade estilo mecha", listo: false },
   { n: 7, slug: "m7-brazo-robotico", titulo: "Brazo robótico", desc: "Pistones, bisagras, rótulas y rigging básico con huesos.", proyecto: "Brazo articulado", listo: false },
   { n: 8, slug: "m8-materiales-render", titulo: "Materiales y render", desc: "Metal procedural, desgaste en bordes, emisivos e iluminación de estudio.", proyecto: "Render de portfolio", listo: false },
