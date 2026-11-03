@@ -15,9 +15,13 @@ function cargar(nombre) {
   if (!cache.has(nombre)) {
     cache.set(nombre, loader.loadAsync(new URL(nombre + ".glb", BASE).href).then(g => {
       g.scene.traverse(o => {
+        // los cortadores booleanos se ven siempre, en azul, como en el render
+        const cortador = /Cortador/.test(o.name + (o.parent?.name || ""));
         if (o.isLineSegments || o.isLine) {
-          o.material = new THREE.LineBasicMaterial({ color: 0x0a0c10, transparent: true, opacity: 0.85 });
-          o.userData.malla = true;
+          o.material = new THREE.LineBasicMaterial({
+            color: cortador ? 0x3db4ff : 0x0a0c10, transparent: true, opacity: cortador ? 1 : 0.85,
+          });
+          o.userData.malla = !cortador;
         } else if (o.isMesh) {
           o.material.polygonOffset = true;
           o.material.polygonOffsetFactor = 1;
@@ -41,6 +45,7 @@ class ForjaVisor extends HTMLElement {
     this.etiquetas = (this.dataset.etiquetas || "").split("|");
     this.notas = (this.dataset.notas || "").split("|");
     this.malla = this.dataset.malla !== "off";
+    this.vista = (this.dataset.vista || "0.75,0.55,1").split(",").map(Number);
     this.innerHTML = `
       <div class="visor">
         <span class="badge3d">3D · ARRASTRA PARA GIRAR · RUEDA PARA ZOOM</span>
@@ -151,7 +156,7 @@ class ForjaVisor extends HTMLElement {
     const c = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3()).length();
     this.ctrl.target.copy(c);
-    this.cam.position.copy(c).add(new THREE.Vector3(0.75, 0.55, 1).normalize().multiplyScalar(size * 1.75));
+    this.cam.position.copy(c).add(new THREE.Vector3(...this.vista).normalize().multiplyScalar(size * Number(this.dataset.distancia || 1.75)));
     this.cam.near = size / 100;
     this.cam.far = size * 20;
     this.cam.updateProjectionMatrix();

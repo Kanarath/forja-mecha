@@ -4,7 +4,7 @@ export const MODULOS = [
   { n: 0, slug: "m0-preparacion", titulo: "Preparar el hangar", desc: "Blender, addons gratuitos, navegación y tu estudio de render.", proyecto: "Estudio gris de render", listo: true },
   { n: 1, slug: "m1-celda-energia", titulo: "Celda de energía", desc: "Extrude, Inset, Loop Cut y Bevel: las 4 herramientas que más usarás.", proyecto: "Batería del mango del arma", listo: true },
   { n: 2, slug: "m2-sombreado", titulo: "Sombreado limpio", desc: "Normales, n-gons, Smooth by Angle, Harden Normals y Weighted Normal.", proyecto: "Módulo técnico sin artefactos", listo: true },
-  { n: 3, slug: "m3-placa-blindaje", titulo: "Placa de blindaje", desc: "Booleanos no destructivos, paneles, rejillas y luces incrustadas.", proyecto: "Placa con paneles y luces", listo: false },
+  { n: 3, slug: "m3-placa-blindaje", titulo: "Placa de blindaje", desc: "Booleanos no destructivos, paneles, rejillas y luces incrustadas.", proyecto: "Placa con paneles y luces", listo: true },
   { n: 4, slug: "m4-cabeza-robot", titulo: "Cabeza de robot", desc: "Subdivision Surface y support loops para curvas limpias.", proyecto: "Casco de androide", listo: false },
   { n: 5, slug: "m5-placa-base", titulo: "Placa base sci-fi", desc: "Kitbash, greebles, cables con curvas y tu biblioteca en el Asset Browser.", proyecto: "Núcleo con módulos y cableado", listo: false },
   { n: 6, slug: "m6-espada-arma", titulo: "Espada-arma", desc: "Blockout, silueta, lenguaje de formas y reparto de detalle.", proyecto: "Gunblade estilo mecha", listo: false },

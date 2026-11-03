@@ -70,7 +70,7 @@ def obj_from_bm(name, bm, material=None, smooth=False):
     return o
 
 
-def wire_overlay(o, thickness=0.006, evaluated=False):
+def wire_overlay(o, thickness=0.006, evaluated=False, material=None):
     """Copia con modificador Wireframe: así se ve la topología en el render."""
     if evaluated:
         dg = bpy.context.evaluated_depsgraph_get()
@@ -81,7 +81,7 @@ def wire_overlay(o, thickness=0.006, evaluated=False):
     bpy.context.scene.collection.objects.link(w)
     w.matrix_world = o.matrix_world.copy()
     me.materials.clear()
-    me.materials.append(MATS()["wire"])
+    me.materials.append(material or MATS()["wire"])
     m = w.modifiers.new("wire", "WIREFRAME")
     m.thickness = thickness
     m.use_even_offset = True
@@ -505,6 +505,205 @@ def hero_renders():
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "estudio_base.blend"))
 
 
+# ------------------------------------------- Lección 3: placa de blindaje
+
+def chamfer_rect(x0, x1, y0, y1, c, esquinas=(1, 1, 1, 1)):
+    """Rectángulo con esquinas achaflanadas (ab-izq, ab-der, arr-der, arr-izq), sentido antihorario."""
+    a, b, cc, d = (c * e for e in esquinas)
+    pts = []
+    pts += [(x0, y0 + a), (x0 + a, y0)] if a else [(x0, y0)]
+    pts += [(x1 - b, y0), (x1, y0 + b)] if b else [(x1, y0)]
+    pts += [(x1, y1 - cc), (x1 - cc, y1)] if cc else [(x1, y1)]
+    pts += [(x0 + d, y1), (x0, y1 - d)] if d else [(x0, y1)]
+    return pts
+
+
+def prism(name, pts, z0, z1, material=None):
+    bm = bmesh.new()
+    vs = [bm.verts.new((x, y, z0)) for x, y in pts]
+    f = bm.faces.new(vs)
+    r = bmesh.ops.extrude_face_region(bm, geom=[f])
+    top = [v for v in r["geom"] if isinstance(v, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=top, vec=(0, 0, z1 - z0))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return obj_from_bm(name, bm, material)
+
+
+def ring_wall(name, pts, z0, z1, thickness, material=None):
+    """Pared abierta siguiendo un contorno + Solidify: el cortador de líneas de panel."""
+    bm = bmesh.new()
+    lo = [bm.verts.new((x, y, z0)) for x, y in pts]
+    hi = [bm.verts.new((x, y, z1)) for x, y in pts]
+    n = len(pts)
+    for i in range(n):
+        j = (i + 1) % n
+        bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    o = obj_from_bm(name, bm, material)
+    s = o.modifiers.new("Solidify", "SOLIDIFY")
+    s.thickness = thickness
+    s.offset = 0
+    s.use_even_offset = True
+    return o
+
+
+def plate_base(M):
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    bmesh.ops.scale(bm, vec=(2.0, 1.3, 0.16), verts=bm.verts)
+    bmesh.ops.translate(bm, verts=bm.verts, vec=(0, 0, 0.08))
+    vert_edges = [e for e in bm.edges if abs(e.verts[0].co.z - e.verts[1].co.z) > 0.1]
+    bmesh.ops.bevel(bm, geom=vert_edges + list({v for e in vert_edges for v in e.verts}),
+                    offset=0.3, segments=1, affect="EDGES", profile=0.5)
+    bm.normal_update()
+    top = max((f for f in bm.faces if f.normal.z > 0.99), key=lambda f: f.calc_center_median().z)
+    bmesh.ops.inset_individual(bm, faces=[top], thickness=0.12, depth=0)
+    r = bmesh.ops.extrude_face_region(bm, geom=[top])
+    vs = [v for v in r["geom"] if isinstance(v, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=vs, vec=(0, 0, 0.04))
+    bmesh.ops.delete(bm, geom=[top], context="FACES")
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return obj_from_bm("Placa", bm, M["armor"])
+
+
+def bolt(name, x, y, M):
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=12,
+                          radius1=0.035, radius2=0.035, depth=0.025)
+    bmesh.ops.translate(bm, verts=bm.verts, vec=(x, y, 0.16 + 0.0125))
+    bm.normal_update()
+    top = max((f for f in bm.faces if f.normal.z > 0.99), key=lambda f: f.calc_center_median().z)
+    bmesh.ops.inset_individual(bm, faces=[top], thickness=0.012, depth=-0.008)
+    o = obj_from_bm(name, bm, M["dark"], smooth=True)
+    b = o.modifiers.new("Bevel", "BEVEL")
+    b.width, b.segments, b.harden_normals = 0.003, 2, True
+    b.limit_method = "ANGLE"
+    return o
+
+
+def build_plate(M, upto, cambio=False):
+    """Construye la placa hasta el paso `upto` (1-7). Devuelve (placa, cortadores, extras)."""
+    p = plate_base(M)
+    coll = bpy.data.collections.new("Cortadores")
+    bpy.context.scene.collection.children.link(coll)
+    cut_mat = mat("Cortador", (0.1, 0.6, 1.0))
+    cutters, extras = [], []
+
+    def add_cutter(o):
+        bpy.context.scene.collection.objects.unlink(o)
+        coll.objects.link(o)
+        o.display_type = "WIRE"
+        o.hide_render = True
+        cutters.append(o)
+
+    if upto >= 2:
+        sx = 0.8 if cambio else 1.0
+        pts = chamfer_rect(-0.72 * sx, -0.08 * sx, -0.36, 0.36, 0.12, (0, 1, 0, 1))
+        add_cutter(ring_wall("Cortador_panel", pts, 0.17, 0.3, 0.018, cut_mat))
+    if upto >= 3:
+        m = p.modifiers.new("Boolean", "BOOLEAN")
+        m.operand_type = "COLLECTION"
+        m.collection = coll
+        m.solver = "EXACT"
+    if upto >= 4:
+        v = prism("Cortador_rejilla", chamfer_rect(0.18, 0.23, -0.2, 0.2, 0.02), 0.14, 0.3, cut_mat)
+        a = v.modifiers.new("Array", "ARRAY")
+        a.count = 8 if cambio else 6
+        a.use_relative_offset = False
+        a.use_constant_offset = True
+        a.constant_offset_displace = (0.065 if cambio else 0.09, 0, 0)
+        add_cutter(v)
+    if upto >= 5:
+        def dashes(name, inset, z0, z1, material):
+            o = prism(name, chamfer_rect(-0.476 + inset, -0.336 - inset, -0.61 + inset, -0.57 - inset, 0.02),
+                      z0, z1, material)
+            a = o.modifiers.new("Array", "ARRAY")
+            a.count = 5
+            a.use_relative_offset = False
+            a.use_constant_offset = True
+            a.constant_offset_displace = (0.203, 0, 0)
+            mi = o.modifiers.new("Mirror", "MIRROR")
+            mi.use_axis = (False, True, False)
+            return o
+        add_cutter(dashes("Cortador_luces", 0, 0.13, 0.25, cut_mat))
+        extras.append(dashes("Luces", 0.004, 0.13, 0.15, M["core"]))
+    if upto >= 6:
+        for i, (x, y) in enumerate([(-0.94, -0.3), (-0.94, 0.3), (0.94, -0.3), (0.94, 0.3)]):
+            extras.append(bolt(f"Tornillo_{i}", x, y, M))
+    if upto >= 7:
+        for poly in p.data.polygons:
+            poly.use_smooth = True
+        b = p.modifiers.new("Bevel", "BEVEL")
+        b.width = 0.006
+        b.segments = 2
+        b.limit_method = "ANGLE"
+        b.angle_limit = math.radians(30)
+        b.harden_normals = True
+        w = p.modifiers.new("WeightedNormal", "WEIGHTED_NORMAL")
+        w.keep_sharp = True
+    return p, cutters, extras
+
+
+def lesson3():
+    names = ["base", "cortador", "panel", "rejilla", "luces", "tornillos", "final"]
+    for i, nm in enumerate(names, start=1):
+        reset()
+        M = MATS()
+        workbench()
+        camera((1.45, -2.35, 2.25), (0.02, -0.05, 0.08), 40)
+        p, cutters, extras = build_plate(M, i)
+        cmat = bpy.data.materials["Cortador"]
+        overlays = [wire_overlay(c, 0.004, evaluated=True, material=cmat) for c in cutters if i <= 5]
+        w = wire_overlay(p, 0.0025 if i == 7 else 0.0035, evaluated=True)
+        render(f"l3_{i:02d}_{nm}")
+        if i == 7:
+            hide([w])
+            render("l3_07_final_limpio")
+        hide([w] + overlays)
+        edges = [edge_object(p, evaluated=True)] + [edge_object(c, evaluated=True) for c in cutters if i <= 5]
+        export_glb(f"blindaje_{i:02d}", [p] + extras + edges)
+        if i == 7:
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "placa_blindaje.blend"))
+
+    # no destructivo: mismos cortadores, otros valores
+    reset()
+    M = MATS()
+    workbench()
+    camera((1.45, -2.35, 2.25), (0.02, -0.05, 0.08), 40)
+    p, cutters, extras = build_plate(M, 5, cambio=True)
+    cmat = bpy.data.materials["Cortador"]
+    for c in cutters:
+        wire_overlay(c, 0.004, evaluated=True, material=cmat)
+    wire_overlay(p, 0.0035, evaluated=True)
+    render("l3_cambio")
+
+
+def lesson3_eevee():
+    reset()
+    M = MATS()
+    studio(M)
+    eevee()
+    p, cutters, extras = build_plate(M, 7)
+    pivot = bpy.data.objects.new("Soporte", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    for o in [p] + extras + cutters:  # los cortadores viajan con la placa
+        o.parent = pivot
+    pivot.rotation_euler = (math.radians(65), 0, math.radians(-12))
+    pivot.location = (0, 0, 0.62)
+    # una celda del módulo 1 al lado: las piezas se combinan
+    c, cx = build_cell(cell_steps()[-1], 6, M, final=True)
+    for o in [c] + cx:
+        o.scale = (0.42, 0.42, 0.42)
+        o.location = (1.35, -0.1, 0)
+    camera((1.1, -4.2, 1.3), (0.3, 0, 0.62), 50)
+    render("l3_eevee", 1600, 900)
+
+
+if MODE == "m3e":
+    lesson3_eevee()
+if MODE == "m3":
+    lesson3()
+    lesson3_eevee()
 if MODE in ("workbench", "all"):
     lesson1_workbench()
     lesson2_workbench()

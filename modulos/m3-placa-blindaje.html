@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03 · Placa de blindaje · Forja Mecha</title>
+  <meta name="description" content="Booleanos no destructivos en Blender: líneas de panel, rejillas con Array, luces incrustadas y tornillos flotantes para una placa de blindaje mecha.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m3-placa-blindaje">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 03</div>
+      <h1>Placa de blindaje</h1>
+      <p style="color:var(--muted);max-width:680px">Las líneas de panel, rejillas y luces incrustadas que ves en el blindaje de cualquier Gundam se hacen con <strong>booleanos no destructivos</strong>: piezas invisibles que «muerden» la superficie y que puedes mover o cambiar en cualquier momento.</p>
+      <div class="meta"><span>~2 horas</span><span>Nivel: inicio-medio</span><span>Herramientas: Boolean · Solidify · Array · Mirror</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#concepto">Qué es un cortador</a>
+      <a href="#visor">La placa en 3D</a>
+      <a href="#p1">1 · Base</a>
+      <a href="#p2">2 · Cortador de panel</a>
+      <a href="#p3">3 · El booleano</a>
+      <a href="#p4">4 · Rejilla con Array</a>
+      <a href="#p5">5 · Luces incrustadas</a>
+      <a href="#p6">6 · Tornillos flotantes</a>
+      <a href="#p7">7 · Acabado</a>
+      <a href="#magia">Por qué no destructivo</a>
+      <a href="#problemas">Problemas típicos</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l3_eevee.webp" alt="Placa de blindaje con línea de panel, rejilla, luces azules y tornillos, junto a la celda de energía" loading="lazy">
+          <figcaption>La placa terminada, junto a la celda del módulo 1. Fíjate en las luces discontinuas: son las mismas que recorren la hoja de tu espada de referencia.</figcaption>
+        </figure>
+        <p>Esta placa es un «módulo de blindaje» genérico: lo podrás reutilizar en el pecho del androide, en un hombro o en el lateral de la espada. Aprenderás:</p>
+        <ul>
+          <li><strong>Cortadores</strong> y el modificador <strong>Boolean</strong> con una colección.</li>
+          <li><strong>Líneas de panel</strong> con un cortador hueco (Solidify).</li>
+          <li><strong>Rejillas</strong> repitiendo un cortador con <strong>Array</strong>.</li>
+          <li><strong>Luces incrustadas</strong> con Array + <strong>Mirror</strong>.</li>
+          <li><strong>Floaters</strong>: detalles que se apoyan sin estar unidos.</li>
+        </ul>
+      </section>
+
+      <section id="concepto">
+        <h2>Qué es un cortador <span class="tag">// concepto</span></h2>
+        <p>Un <strong>cortador</strong> (<em>cutter</em>) es un objeto normal que no se ve en el render: solo sirve para restar su volumen a otro objeto mediante el modificador <strong>Boolean</strong>. Es como una plantilla de troquel.</p>
+        <div class="grid c2">
+          <div class="card"><h3>Destructivo</h3><p>Aplicas el booleano y la malla cambia para siempre. Si luego la rejilla te parece pequeña, toca rehacerla. Es lo que hiciste en el reto del módulo 2.</p></div>
+          <div class="card"><h3>No destructivo</h3><p>El modificador se queda vivo. Mueves, escalas o duplicas el cortador y el corte se actualiza al instante. Así se diseña en hard surface.</p></div>
+        </div>
+        <figure>
+          <img src="../assets/img/l3_05_luces.webp" alt="Placa con todos los cortadores visibles en azul" loading="lazy">
+          <figcaption>Los cortadores, en azul. Ninguno sale en el render, pero cada uno «muerde» la placa: un anillo para la línea de panel, una ranura repetida para la rejilla y un guion repetido y reflejado para las luces.</figcaption>
+        </figure>
+      </section>
+
+      <section id="visor">
+        <h2>Gírala paso a paso <span class="tag">// 3D</span></h2>
+        <p>Los cortadores aparecen en azul. Activa <strong>Malla</strong> para ver cómo el booleano reorganiza la geometría de la placa.</p>
+        <forja-visor
+          data-vista="0.55,1.15,1" data-distancia="1.5"
+          data-modelos="blindaje_01,blindaje_02,blindaje_03,blindaje_04,blindaje_05,blindaje_06,blindaje_07"
+          data-etiquetas="1 Base|2 Cortador|3 Panel|4 Rejilla|5 Luces|6 Tornillos|7 Final"
+          data-notas="La base: un cubo con esquinas achaflanadas y una meseta (Inset + Extrude).|El cortador de la línea de panel: una pared hueca con Solidify. Todavía no corta nada.|Boolean con la colección «Cortadores»: aparece la línea de panel.|Una ranura + Array = rejilla. Basta con meterla en la colección.|Guiones con Array + Mirror: los huecos de las luces, y dentro, las luces.|Tornillos «flotantes»: apoyados encima, sin unirlos a la placa.|Bevel + Weighted Normal después del booleano: los cortes también brillan."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>La base de la placa</h3></div>
+          <figure><img src="../assets/img/l3_01_base.webp" alt="Placa base octogonal con una meseta superior" loading="lazy"></figure>
+          <ol>
+            <li>Parte de tu <code>estudio_base.blend</code>. Añade un cubo y, en el panel <kbd>N</kbd> → Item → <strong>Dimensions</strong>, pon <code>2</code> × <code>1.3</code> × <code>0.16</code>.</li>
+            <li><kbd>Ctrl</kbd>+<kbd>A</kbd> → <strong>Scale</strong> (ya sabes por qué) y súbelo al suelo: <kbd>G</kbd> <kbd>Z</kbd> <code>0.08</code>.</li>
+            <li><kbd>Tab</kbd>, modo aristas (<kbd>2</kbd>). Vista superior (<kbd>Num 7</kbd>), activa los rayos X (<kbd>Alt</kbd>+<kbd>Z</kbd>) y selecciona con <kbd>Shift</kbd>+clic las 4 aristas verticales de las esquinas.</li>
+            <li><kbd>Ctrl</kbd>+<kbd>B</kbd>, escribe <code>0.3</code> y gira la rueda hasta <strong>1 segmento</strong>: esquinas achaflanadas, la silueta típica mecha.</li>
+            <li>Modo caras (<kbd>3</kbd>), selecciona la cara de arriba: <kbd>I</kbd> <code>0.12</code> y <kbd>E</kbd> <code>0.04</code>. Ya tienes una meseta y un marco.</li>
+          </ol>
+          <div class="note why"><p><strong>Capas de altura:</strong> la meseta crea dos niveles. En hard surface se diseña en «capas»: base, placas encima y detalles encima de las placas. Esa superposición es lo que da sensación de complejidad mecánica.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>El cortador de la línea de panel</h3></div>
+          <figure><img src="../assets/img/l3_02_cortador.webp" alt="Contorno azul del cortador de panel sobre la placa" loading="lazy"></figure>
+          <p>Una línea de panel es un surco fino. Por eso el cortador no es un bloque, sino una <strong>pared hueca</strong> con la forma del panel:</p>
+          <ol>
+            <li>En modo objeto, <kbd>Shift</kbd>+<kbd>A</kbd> → <strong>Plane</strong>. En modo edición, escálalo y muévelo hasta que cubra la mitad izquierda de la meseta (unos 0.64 × 0.72).</li>
+            <li>Modo vértices (<kbd>1</kbd>): selecciona dos esquinas opuestas y pulsa <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> (bevel de vértices) con <code>0.12</code> y 1 segmento.</li>
+            <li><kbd>A</kbd> → <kbd>X</kbd> → <strong>Only Faces</strong>: borras la cara y te queda solo el contorno.</li>
+            <li><kbd>A</kbd> → <kbd>E</kbd> <kbd>Z</kbd> <code>0.13</code>: el contorno se convierte en una pared.</li>
+            <li>Colócala para que <strong>atraviese</strong> la superficie de la meseta (de Z ≈ 0.17 a 0.30). El surco tendrá la profundidad de lo que quede por debajo.</li>
+            <li>Modo objeto → modificador <strong>Solidify</strong>: <strong>Thickness 0.018</strong>, <strong>Offset 0</strong>. Ese grosor es el ancho de la línea de panel.</li>
+            <li>Ponle un nombre claro: doble clic en el Outliner → <code>Cortador_panel</code>.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>El booleano no destructivo</h3></div>
+          <figure><img src="../assets/img/l3_03_panel.webp" alt="Placa con la línea de panel cortada y el cortador visible" loading="lazy"></figure>
+          <ol>
+            <li>Con el cortador seleccionado, pulsa <kbd>M</kbd> → <strong>+ New Collection</strong> y llámala <code>Cortadores</code>.</li>
+            <li>Selecciona la placa → Add Modifier → Generate → <strong>Boolean</strong>:
+              <ul>
+                <li><strong>Difference</strong> (restar)</li>
+                <li><strong>Operand Type: Collection</strong> → <code>Cortadores</code></li>
+                <li><strong>Solver: Exact</strong></li>
+              </ul>
+            </li>
+            <li>Al cortador: pestaña Object → <em>Viewport Display</em> → <strong>Display As: Wire</strong>, y en <em>Visibility</em> desactiva <strong>Renders</strong>.</li>
+            <li>Para que los cortadores viajen con la placa: selecciona el cortador, luego la placa con <kbd>Shift</kbd> (la última es la activa), y pulsa <kbd>Ctrl</kbd>+<kbd>P</kbd> → <strong>Object (Keep Transform)</strong>.</li>
+          </ol>
+          <div class="note tip"><p><strong>¿Por qué una colección?</strong> Con un único modificador Boolean apuntando a la colección, <em>cualquier objeto que metas en <code>Cortadores</code> corta automáticamente</em>. No tienes que tocar la placa nunca más.</p></div>
+          <div class="note free"><p><strong>Con Bool Tool:</strong> selecciona el cortador, luego la placa, y pulsa <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Num −</kbd> (<em>Brush Difference</em>). Te crea el modificador y pone el cortador en wire automáticamente, aunque añade un modificador por cada cortador. Las dos formas son válidas, así que prueba ambas.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Rejilla: una ranura repetida con Array</h3></div>
+          <figure><img src="../assets/img/l3_04_rejilla.webp" alt="Rejilla de seis ranuras cortadas en la placa" loading="lazy"></figure>
+          <ol>
+            <li>Añade un cubo y dale <strong>Dimensions</strong> <code>0.05</code> × <code>0.4</code> × <code>0.16</code>. <kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale.</li>
+            <li>Achaflana sus 4 aristas verticales: <kbd>Ctrl</kbd>+<kbd>B</kbd> <code>0.02</code>, 1 segmento. Las ranuras con extremos en punta quedan mucho más «sci‑fi» que los rectángulos.</li>
+            <li>Colócala en la derecha de la meseta, atravesando la superficie (unos 6 cm de profundidad).</li>
+            <li>Modificador <strong>Array</strong>: <strong>Count 6</strong>, desactiva <em>Relative Offset</em>, activa <em>Constant Offset</em> con <strong>X = 0.09</strong>.</li>
+            <li><kbd>M</kbd> → <code>Cortadores</code>. Y ya está: la rejilla aparece sola.</li>
+          </ol>
+          <div class="note why"><p><strong>Relative vs. Constant:</strong> <em>Relative</em> repite en múltiplos del tamaño del objeto (1 = pegados). <em>Constant</em> usa metros exactos. Para rejillas con huecos precisos, Constant es más cómodo.</p></div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Luces incrustadas: Array + Mirror</h3></div>
+          <figure><img src="../assets/img/l3_05_luces.webp" alt="Huecos de luces en el marco con las luces azules dentro" loading="lazy"></figure>
+          <ol>
+            <li>Un cubo de <code>0.14</code> × <code>0.04</code> × <code>0.12</code> con las aristas verticales achaflanadas a <code>0.02</code>: queda un guion hexagonal.</li>
+            <li>Colócalo en el marco delantero (Y ≈ −0.59), atravesando unos 3 cm la superficie, en el extremo izquierdo.</li>
+            <li><strong>Array</strong>: Count 5, Constant Offset <strong>X = 0.203</strong>.</li>
+            <li><strong>Mirror</strong>: desmarca X, marca <strong>Y</strong> y, en <em>Mirror Object</em>, elige la <strong>placa</strong>. Así se refleja respecto al centro de la placa y aparece la fila de atrás.</li>
+            <li>Mételo en <code>Cortadores</code>.</li>
+            <li><strong>Las luces:</strong> duplica el cortador (<kbd>Shift</kbd>+<kbd>D</kbd>, clic derecho para dejarlo en su sitio), sácalo de la colección con <kbd>M</kbd> → <em>Scene Collection</em>, vuelve a activarle <em>Renders</em> y <em>Display As: Textured</em>.</li>
+            <li>En modo edición, selecciona su cara de arriba y bájala: <kbd>G</kbd> <kbd>Z</kbd> <code>-0.1</code>. Después <kbd>A</kbd> → <kbd>S</kbd> <kbd>Shift</kbd>+<kbd>Z</kbd> <code>0.95</code> para que no toque las paredes del hueco.</li>
+            <li>Material con <strong>Emission</strong> azul, Strength 6–9, como el núcleo del módulo 1.</li>
+          </ol>
+          <div class="note warn"><p><strong>Superficies que se tocan:</strong> si la luz coincide exactamente con las paredes del hueco, verás parpadeos (<em>z‑fighting</em>). Por eso la encogemos un 5 %: un pequeño hueco es invisible y evita el problema.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Tornillos flotantes</h3></div>
+          <figure><img src="../assets/img/l3_06_tornillos.webp" alt="Cuatro tornillos apoyados en el marco de la placa" loading="lazy"></figure>
+          <ol>
+            <li>Cilindro: <strong>Vertices 12</strong>, <strong>Radius 0.035</strong>, <strong>Depth 0.025</strong>. Apóyalo sobre el marco.</li>
+            <li>Cara de arriba: <kbd>I</kbd> <code>0.012</code> y <kbd>E</kbd> <code>-0.008</code>: la cabeza hueca.</li>
+            <li>Shade Smooth + un Bevel pequeño (<code>0.003</code>, 2 segmentos, Harden Normals) y material oscuro.</li>
+            <li>Haz 3 copias con <kbd>Alt</kbd>+<kbd>D</kbd> (duplicado <em>enlazado</em>): si luego cambias la forma de uno, cambian todos.</li>
+          </ol>
+          <div class="note why"><p><strong>Floaters:</strong> estos tornillos <em>no están unidos</em> a la placa, solo apoyados encima. A la distancia de un render nadie nota la junta, y te ahorras booleanos y geometría complicada. Los profesionales lo usan muchísimo para tornillos, logos, tuercas, bisagras o placas de serie.</p></div>
+        </div>
+      </section>
+
+      <section id="p7">
+        <div class="step">
+          <div class="step-head"><span class="n">7</span><h3>Acabado después del booleano</h3></div>
+          <div class="compare">
+            <img src="../assets/img/l3_06_tornillos.webp" alt="Placa sin biselar">
+            <div class="after"><img src="../assets/img/l3_07_final_limpio.webp" alt="Placa biselada"></div>
+            <div class="handle"></div>
+            <span class="lab l">SIN BEVEL</span><span class="lab r">CON BEVEL</span>
+            <input type="range" min="0" max="100" value="50" aria-label="Comparar sin bevel y con bevel">
+          </div>
+          <ol>
+            <li>Placa → <strong>Shade Smooth</strong>.</li>
+            <li>Bevel <em>debajo</em> del Boolean: <strong>Amount 0.006</strong>, <strong>Segments 2</strong>, <strong>Angle 30°</strong>, <strong>Harden Normals</strong> ✓.</li>
+            <li>Weighted Normal (Keep Sharp) al final.</li>
+          </ol>
+          <p>El orden importa: <strong>Boolean → Bevel → Weighted Normal</strong>. Como el bisel se calcula <em>después</em> del corte, los bordes de las ranuras y de la línea de panel también se redondean y brillan.</p>
+          <div class="note warn"><p><strong>Bisel menor que la mitad del surco.</strong> La línea de panel mide 0.018 de ancho. Si el Bevel supera ~0.009, los dos lados se pisan y salen artefactos. Deja <em>Clamp Overlap</em> activado y empieza siempre con valores pequeños.</p></div>
+          <figure><img src="../assets/img/l3_07_final.webp" alt="Malla final de la placa con bevel" loading="lazy"><figcaption>La malla resultante. Tú nunca la tocas: la generan los modificadores a partir de la base y los cortadores.</figcaption></figure>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>placa_blindaje.blend</strong><small>La placa con el sistema no destructivo completo: colección de cortadores, modificadores vivos, luces y tornillos.</small></div>
+            <a class="btn small ghost" href="../assets/blend/placa_blindaje.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="magia">
+        <h2>Por qué no destructivo <span class="tag">// la ventaja</span></h2>
+        <div class="compare">
+          <img src="../assets/img/l3_05_luces.webp" alt="Versión original de la placa">
+          <div class="after"><img src="../assets/img/l3_cambio.webp" alt="Versión modificada de la placa"></div>
+          <div class="handle"></div>
+          <span class="lab l">ORIGINAL</span><span class="lab r">2 NÚMEROS CAMBIADOS</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar versión original y modificada">
+        </div>
+        <p>A la derecha: la rejilla tiene <strong>8 ranuras</strong> en vez de 6 (Count del Array) y el panel es <strong>más estrecho</strong> (escalé el cortador en X). No he rehecho nada. Diseñar así te deja <em>probar ideas</em> en segundos, y eso es lo que más necesitas cuando dejas volar la imaginación.</p>
+        <div class="note tip"><p><strong>¿Cuándo aplicar los booleanos?</strong> Casi nunca mientras diseñas. Solo al final, si necesitas exportar el modelo a otro programa o el archivo se vuelve lento. Antes de aplicar, guarda una copia del archivo.</p></div>
+      </section>
+
+      <section id="problemas">
+        <h2>Problemas típicos con booleanos <span class="tag">// diagnóstico</span></h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Síntoma</th><th>Causa</th><th>Arreglo</th></tr>
+            <tr><td>El corte parpadea o deja una piel fina</td><td>La cara del cortador coincide justo con la superficie (coplanar)</td><td>Haz que el cortador <strong>atraviese</strong> la superficie con margen.</td></tr>
+            <tr><td>El corte no aparece o desaparece entero</td><td>Cortador abierto (no es un volumen cerrado) o con normales invertidas</td><td>Ciérralo (Solidify o <kbd>F</kbd> para rellenar) y <kbd>Shift</kbd>+<kbd>N</kbd>.</td></tr>
+            <tr><td>Todo va lento</td><td>Solver Exact con muchos cortadores densos</td><td>Prueba <strong>Solver: Fast</strong> mientras diseñas, o usa menos segmentos en los cortadores.</td></tr>
+            <tr><td>Manchas alrededor del corte</td><td>Sombreado sin la receta</td><td>Bevel (Harden Normals) + Weighted Normal, como en el módulo 2.</td></tr>
+            <tr><td>Bisel deformado</td><td>Escala sin aplicar en la placa o en el cortador</td><td><kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale en los dos.</td></tr>
+          </table>
+        </div>
+        <p>El <a href="m2-sombreado.html#revisor">Revisor de Forja</a> te avisa de varios de estos problemas.</p>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu propia placa <span class="tag">// checklist</span></h2>
+        <p>Diseña una placa pensando en una parte concreta de tu androide: el pecho, un hombro o una espinillera. Ideas:</p>
+        <ul>
+          <li>Una escotilla hexagonal con su línea de panel.</li>
+          <li>Una línea de panel en forma de «V» o de flecha, muy Gundam.</li>
+          <li>Luces en otro color (amarillo de advertencia, rojo).</li>
+          <li>Una rejilla circular: una ranura + Array con <em>Object Offset</em> apuntando a un Empty girado.</li>
+        </ul>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="base"><span>Base con chaflanes y al menos dos niveles de altura</span></label></li>
+          <li><label><input type="checkbox" data-id="coleccion"><span>Un único Boolean apuntando a una colección <code>Cortadores</code></span></label></li>
+          <li><label><input type="checkbox" data-id="panel"><span>Línea de panel con cortador hueco (Solidify)</span></label></li>
+          <li><label><input type="checkbox" data-id="array"><span>Rejilla o patrón con Array</span></label></li>
+          <li><label><input type="checkbox" data-id="mirror"><span>Algo reflejado con Mirror usando un Mirror Object</span></label></li>
+          <li><label><input type="checkbox" data-id="luces"><span>Luz emisiva incrustada sin z‑fighting</span></label></li>
+          <li><label><input type="checkbox" data-id="floaters"><span>Floaters duplicados con <kbd>Alt</kbd>+<kbd>D</kbd></span></label></li>
+          <li><label><input type="checkbox" data-id="orden"><span>Orden de modificadores: Boolean → Bevel → Weighted Normal</span></label></li>
+          <li><label><input type="checkbox" data-id="cambio"><span>He cambiado el diseño moviendo cortadores sin rehacer nada</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>
