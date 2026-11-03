@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>08 · Materiales y render · Forja Mecha</title>
+  <meta name="description" content="Materiales procedurales para hard surface en Blender: pintura, rugosidad, desgaste en los bordes con el nodo Bevel, suciedad, emisivos, iluminación y render con EEVEE y Cycles.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <style>
+    .nodos { width: 100%; height: auto; display: block; margin: 18px 0; }
+    .nodos .n rect { fill: var(--panel-2); stroke: var(--line-2); }
+    .nodos .n text { fill: var(--text); font: 600 13px var(--font-head); }
+    .nodos .n .s { fill: var(--muted); font: 400 11px var(--font-body); }
+    .nodos .n.tex rect { stroke: #e0a040; } .nodos .n.mat rect { stroke: #6cbcff; }
+    .nodos .n.out rect { stroke: var(--green); }
+    .nodos path { fill: none; stroke: #8d96a5; stroke-width: 2; }
+    .nodos path.m { stroke: var(--cyan); }
+  </style>
+</head>
+<body data-modulo="m8-materiales-render">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 08</div>
+      <h1>Materiales y render</h1>
+      <p style="color:var(--muted);max-width:680px">El mismo modelo puede parecer un juguete de plástico o una máquina con historia. La diferencia está en los materiales: pintura, rugosidad, bordes gastados que dejan ver el metal y suciedad en los rincones. Y todo <strong>procedural</strong>: sin texturas de pago ni pintar a mano.</p>
+      <div class="meta"><span>~2 horas</span><span>Nivel: medio</span><span>Herramientas: Shader Editor · Bevel · AO · Glare · Cycles</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#pbr">Cómo funciona un material</a>
+      <a href="#p1">1 · Rugosidad viva</a>
+      <a href="#p2">2 · Pintura y paleta</a>
+      <a href="#p3">3 · Desgaste en bordes</a>
+      <a href="#p4">4 · Suciedad</a>
+      <a href="#p5">5 · Emisivos y Glare</a>
+      <a href="#p6">6 · Iluminación</a>
+      <a href="#motores">EEVEE vs Cycles</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>La transformación <span class="tag">// objetivo</span></h2>
+        <figure data-tabs>
+          <div class="tabs">
+            <button class="on" data-src="../assets/img/l8_01_gris.webp" data-cap="<strong>1 · Gris por defecto.</strong> La forma está, pero parece una maqueta sin pintar.">1 Gris</button>
+            <button data-src="../assets/img/l8_02_pintura.webp" data-cap="<strong>2 · Pintura:</strong> colores con intención (blanco, grafito y naranja) y rugosidad que varía.">2 Pintura</button>
+            <button data-src="../assets/img/l8_03_desgaste.webp" data-cap="<strong>3 · Desgaste y suciedad:</strong> los bordes dejan ver el metal y los rincones se oscurecen. Ahora tiene historia.">3 Desgaste</button>
+            <button data-src="../assets/img/l8_04_emision.webp" data-cap="<strong>4 · Emisivos + Glare:</strong> las luces se encienden y brillan en la imagen.">4 Luces</button>
+          </div>
+          <img src="../assets/img/l8_01_gris.webp" alt="Progresión de materiales sobre la placa y la celda" loading="lazy">
+          <figcaption><strong>1 · Gris por defecto.</strong> La forma está, pero parece una maqueta sin pintar.</figcaption>
+        </figure>
+        <p>Es la placa del módulo 3 y la celda del módulo 1, renderizadas con <strong>Cycles</strong>. Amplía las imágenes y fíjate en los bordes de la placa en el paso 3.</p>
+      </section>
+
+      <section id="pbr">
+        <h2>Cómo funciona un material <span class="tag">// concepto</span></h2>
+        <p>El nodo <strong>Principled BSDF</strong> imita materiales reales con unos pocos valores. Para hard surface solo necesitas cuatro:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Entrada</th><th>Qué hace</th><th>Valores típicos</th></tr>
+            <tr><td><strong>Base Color</strong></td><td>El color de la pintura, o el tono del metal</td><td>Evita el blanco y el negro puros: 0.75 y 0.04 son más realistas.</td></tr>
+            <tr><td><strong>Metallic</strong></td><td>0 = pintura o plástico; 1 = metal desnudo</td><td>Casi siempre 0 o 1. Los valores intermedios solo para mezclas (bordes gastados).</td></tr>
+            <tr><td><strong>Roughness</strong></td><td>Lo pulido o mate que es: lo que <em>más</em> vende el realismo</td><td>Pintura 0.35–0.5, metal pulido 0.15–0.25, goma 0.7+.</td></tr>
+            <tr><td><strong>Emission</strong></td><td>Luz propia</td><td>Color + Strength 5–15 para luces de interfaz.</td></tr>
+          </table>
+        </div>
+        <div class="note tip"><p><strong>Activa Node Wrangler</strong> (viene con Blender: <code>Preferences → Add-ons</code>). Con <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+clic en un nodo ves su resultado directamente, lo que es perfecto para entender qué hace cada paso.</p></div>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Rugosidad viva</h3></div>
+          <p>Ninguna superficie real tiene la misma rugosidad en todas partes. Una variación sutil hace que los reflejos «respiren»:</p>
+          <ol>
+            <li>En el <strong>Shader Editor</strong> (workspace <em>Shading</em>), añade <kbd>Shift</kbd>+<kbd>A</kbd> → Texture → <strong>Noise Texture</strong> con Scale 4.</li>
+            <li>Su salida <em>Fac</em> → un nodo <strong>Map Range</strong> con To Min 0.32 y To Max 0.52 → a <strong>Roughness</strong>.</li>
+          </ol>
+          <div class="note why"><p><strong>Sutil es la clave:</strong> si se nota el ruido como manchas, te has pasado. Tiene que verse solo en los reflejos, al girar el modelo.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Pintura y paleta</h3></div>
+          <ol>
+            <li>Varios materiales en un objeto: pestaña Material → <strong>+</strong> para un nuevo hueco → New. En modo edición, selecciona las caras → <strong>Assign</strong>.</li>
+            <li>Regla <strong>60 · 30 · 10</strong>: un color principal (blanco, 60 %), uno secundario (grafito, 30 %) y un acento (naranja o luz azul, 10 %). Es la paleta clásica de los mechas.</li>
+            <li>Guarda tus materiales como asset (clic derecho sobre el material → <em>Mark as Asset</em>) para tenerlos en tu biblioteca del módulo 5.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Desgaste en los bordes</h3></div>
+          <p>Donde las piezas se golpean y rozan, en los bordes, la pintura se va y aparece el metal. Blender puede detectar los bordes con el nodo <strong>Bevel</strong>:</p>
+          <svg class="nodos" viewBox="0 0 900 300" role="img" aria-label="Diagrama de nodos del desgaste en bordes">
+            <g class="n tex"><rect x="10" y="20" width="150" height="54" rx="6"/><text x="22" y="44">Bevel</text><text class="s" x="22" y="62">Radius 0.03 · Normal</text></g>
+            <g class="n tex"><rect x="10" y="100" width="150" height="54" rx="6"/><text x="22" y="124">Geometry</text><text class="s" x="22" y="142">Normal</text></g>
+            <g class="n"><rect x="200" y="58" width="150" height="54" rx="6"/><text x="212" y="82">Vector Math</text><text class="s" x="212" y="100">Dot Product</text></g>
+            <g class="n"><rect x="385" y="58" width="135" height="54" rx="6"/><text x="397" y="82">Math</text><text class="s" x="397" y="100">1 − x → bordes</text></g>
+            <g class="n tex"><rect x="385" y="150" width="135" height="54" rx="6"/><text x="397" y="174">Noise</text><text class="s" x="397" y="192">Scale 12 · rompe</text></g>
+            <g class="n"><rect x="555" y="100" width="135" height="54" rx="6"/><text x="567" y="124">Math × </text><text class="s" x="567" y="142">+ Map Range</text></g>
+            <g class="n mat"><rect x="555" y="200" width="135" height="70" rx="6"/><text x="567" y="224">Mix Color</text><text class="s" x="567" y="242">pintura / metal</text><text class="s" x="567" y="258">(y rugosidad)</text></g>
+            <g class="n out"><rect x="730" y="120" width="160" height="110" rx="6"/><text x="742" y="144">Principled BSDF</text><text class="s" x="742" y="166">Base Color</text><text class="s" x="742" y="186">Metallic ← máscara</text><text class="s" x="742" y="206">Roughness</text></g>
+            <path d="M160 47 C180 47 180 78 200 78"/><path d="M160 127 C180 127 180 92 200 92"/>
+            <path d="M350 85 L385 85"/><path d="M520 85 C540 85 535 120 555 120"/><path d="M520 177 C540 177 535 138 555 138"/>
+            <path class="m" d="M690 127 C710 127 700 182 730 182"/><path class="m" d="M622 154 L622 200"/>
+            <path d="M690 235 C710 235 705 162 730 162"/>
+          </svg>
+          <ol>
+            <li><strong>Bevel</strong> (Input → Bevel) da una normal «redondeada» en los bordes; <strong>Geometry → Normal</strong> da la real.</li>
+            <li><strong>Vector Math → Dot Product</strong> de las dos: en las caras planas vale 1 y en los bordes, menos. Con <strong>Math → Subtract</strong> (1 − x) obtienes una máscara que es blanca en los bordes.</li>
+            <li>Multiplícala por una <strong>Noise Texture</strong> (Scale 12, Detail 8) para que el desgaste sea irregular, y ajústala con <strong>Map Range</strong> (From 0.01–0.05).</li>
+            <li>Esa máscara es el <em>Factor</em> de un <strong>Mix Color</strong> entre la pintura y el metal oscuro, y también va a <strong>Metallic</strong>. Haz otra mezcla para que la rugosidad baje en el metal.</li>
+          </ol>
+          <div class="note warn"><p><strong>Solo en Cycles.</strong> El nodo Bevel no funciona en EEVEE: en EEVEE la máscara sale vacía (lo verás más abajo). Para EEVEE puedes <em>hornear</em> la máscara a una imagen (Render Properties → Bake) o pintarla a mano en modo Texture Paint.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Suciedad en los rincones</h3></div>
+          <ol>
+            <li>Nodo <strong>Ambient Occlusion</strong> (Input), con Distance 0.08: es oscuro en los rincones y huecos.</li>
+            <li><strong>Map Range</strong> con To Min 0.45, para que no llegue a negro puro.</li>
+            <li><strong>Mix Color</strong> en modo <strong>Multiply</strong> con el color que ya tenías.</li>
+          </ol>
+          <p>Fíjate en el paso 3 de arriba: el interior de las ranuras y de la línea de panel queda más oscuro. Es la suciedad que se acumula donde no llega la mano para limpiar.</p>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Emisivos y Glare</h3></div>
+          <ol>
+            <li>Material de luz: en el Principled, <em>Emission</em> → Color azul y <strong>Strength 6–12</strong>. Mantén el color base oscuro: así, si la luz se «apaga» parece cristal.</li>
+            <li>El halo: workspace <strong>Compositing</strong> → <em>Use Nodes</em> → entre <em>Render Layers</em> y <em>Composite</em> añade Filter → <strong>Glare</strong> en modo <strong>Fog Glow</strong> (Threshold 1.2, Size 7).</li>
+            <li>Las luces también iluminan: en Cycles, una superficie emisiva ilumina de verdad lo que tiene cerca. Mira el reflejo azul en la celda.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Iluminación</h3></div>
+          <div class="compare">
+            <img src="../assets/img/l8_05_luz_plana.webp" alt="Render con una sola luz frontal">
+            <div class="after"><img src="../assets/img/l8_04_emision.webp" alt="Render con iluminación de estudio"></div>
+            <div class="handle"></div>
+            <span class="lab l">1 SOL FRONTAL</span><span class="lab r">ESTUDIO 3 PUNTOS</span>
+            <input type="range" min="0" max="100" value="50" aria-label="Comparar iluminación plana y de estudio">
+          </div>
+          <p>Mismos materiales, distinta luz. Con una luz plana de frente desaparecen el volumen y los reflejos: los materiales no tienen nada que reflejar. Con el estudio del módulo 0, las caras se separan por el tono y los bordes brillan.</p>
+          <div class="note free"><p><strong>HDRIs gratis:</strong> <a href="https://polyhaven.com/hdris" target="_blank" rel="noopener">Poly Haven</a> tiene cientos de entornos con licencia CC0 (puedes usarlos para lo que quieras). En World Properties: Color → <em>Environment Texture</em> y abre el HDRI. Da reflejos realistas al metal.</p></div>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>materiales_render.blend</strong><small>La escena con todos los materiales procedurales (pintura blanca, grafito, naranja), los emisivos y el Glare.</small></div>
+            <a class="btn small ghost" href="../assets/blend/materiales_render.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="motores">
+        <h2>EEVEE vs Cycles <span class="tag">// motores</span></h2>
+        <div class="compare">
+          <img src="../assets/img/l8_eevee_mismo.webp" alt="Escena renderizada en EEVEE">
+          <div class="after"><img src="../assets/img/l8_04_emision.webp" alt="Escena renderizada en Cycles"></div>
+          <div class="handle"></div>
+          <span class="lab l">EEVEE</span><span class="lab r">CYCLES</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar EEVEE y Cycles">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <tr><th></th><th>EEVEE</th><th>Cycles</th></tr>
+            <tr><td><strong>Velocidad</strong></td><td>Segundos, casi en tiempo real</td><td>Minutos, sobre todo sin una tarjeta gráfica potente</td></tr>
+            <tr><td><strong>Realismo</strong></td><td>Muy bueno, con aproximaciones</td><td>Físico: rebotes de luz, emisivos que iluminan, sombras exactas</td></tr>
+            <tr><td><strong>Nodo Bevel</strong></td><td>✘ No funciona: sin desgaste en los bordes</td><td>✔</td></tr>
+            <tr><td><strong>Úsalo para</strong></td><td>Trabajar, probar luces y renders rápidos</td><td>El render final de portfolio</td></tr>
+          </table>
+        </div>
+        <div class="note tip"><p><strong>Cycles rápido:</strong> Samples 64–128 + <strong>Denoise</strong> activado. Si tienes gráfica NVIDIA o AMD, actívala en <code>Preferences → System → Cycles Render Devices</code> y pon Device: GPU en las propiedades de render.</p></div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: viste tus piezas <span class="tag">// checklist</span></h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="rugosidad"><span>Rugosidad con Noise + Map Range en mis materiales</span></label></li>
+          <li><label><input type="checkbox" data-id="paleta"><span>Paleta 60·30·10 aplicada a una de mis piezas</span></label></li>
+          <li><label><input type="checkbox" data-id="desgaste"><span>Desgaste en bordes con Bevel + Dot Product + Noise</span></label></li>
+          <li><label><input type="checkbox" data-id="suciedad"><span>Suciedad con Ambient Occlusion en modo Multiply</span></label></li>
+          <li><label><input type="checkbox" data-id="glare"><span>Emisivos con Glare en el compositor</span></label></li>
+          <li><label><input type="checkbox" data-id="hdri"><span>He probado un HDRI gratuito de Poly Haven</span></label></li>
+          <li><label><input type="checkbox" data-id="cycles"><span>Render final en Cycles con Denoise</span></label></li>
+          <li><label><input type="checkbox" data-id="biblioteca"><span>Mis materiales guardados como asset</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+</body>
+</html>

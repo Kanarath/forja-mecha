@@ -9,8 +9,8 @@ export const MODULOS = [
   { n: 5, slug: "m5-placa-base", titulo: "Placa base sci-fi", desc: "Kitbash, greebles, cables con curvas y tu biblioteca en el Asset Browser.", proyecto: "Núcleo con módulos y cableado", listo: true },
   { n: 6, slug: "m6-espada-arma", titulo: "Espada-arma", desc: "Blockout, silueta, lenguaje de formas y reparto de detalle.", proyecto: "Gunblade estilo mecha", listo: true },
   { n: 7, slug: "m7-brazo-robotico", titulo: "Brazo robótico", desc: "Pistones, bisagras, rótulas y rigging básico con huesos.", proyecto: "Brazo articulado", listo: true },
-  { n: 8, slug: "m8-materiales-render", titulo: "Materiales y render", desc: "Metal procedural, desgaste en bordes, emisivos e iluminación de estudio.", proyecto: "Render de portfolio", listo: false },
-  { n: 9, slug: "m9-androide", titulo: "Androide", desc: "Proyecto final: el cuerpo completo, pieza a pieza.", proyecto: "Tu androide", listo: false },
+  { n: 8, slug: "m8-materiales-render", titulo: "Materiales y render", desc: "Metal procedural, desgaste en bordes, emisivos e iluminación de estudio.", proyecto: "Render de portfolio", listo: true },
+  { n: 9, slug: "m9-androide", titulo: "Androide", desc: "Proyecto final: el cuerpo completo, pieza a pieza.", proyecto: "Tu androide", listo: true },
 ];
 
 // --- almacenamiento seguro (modo privado o almacenamiento bloqueado => sin progreso, pero la web funciona)
@@ -132,7 +132,7 @@ function initLightbox() {
   document.addEventListener("keydown", e => { if (e.key === "Escape") lb.classList.remove("on"); });
   document.addEventListener("click", e => {
     const img = e.target.closest("figure img, img.shot");
-    if (!img || img.closest(".compare")) return;
+    if (!img || img.closest(".compare, a")) return;
     lb.querySelector("img").src = img.currentSrc || img.src;
     lb.classList.add("on");
   });

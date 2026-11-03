@@ -8,7 +8,7 @@ Uso (desde la raíz del repo):
   blender -b --factory-startup --python tools/forja_build.py -- [workbench|eevee|all]
 """
 import bpy, bmesh, math, os, sys
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 IMG = os.path.join(ROOT, "assets", "img")
@@ -1090,7 +1090,7 @@ def mesh_copies(objs):
         me = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
         c = bpy.data.objects.new(o.name + "_glb", me)
         bpy.context.scene.collection.objects.link(c)
-        c.matrix_world = o.matrix_world.copy()
+        c.matrix_world = o.evaluated_get(dg).matrix_world.copy()  # incluye constraints
         out.append(c)
     return out
 
@@ -1162,6 +1162,728 @@ def lesson5_eevee():
     render("l5_eevee", 1600, 900)
 
 
+# ------------------------------------------------ Lección 6: espada-arma
+
+def side_prism_bm(pts, y0, y1):
+    """Perfil en el plano XZ (vista lateral) extruido en Y: así se dibujan armas de perfil."""
+    bm = bmesh.new()
+    vs = [bm.verts.new((x, y0, z)) for x, z in pts]
+    f = bm.faces.new(vs)
+    r = bmesh.ops.extrude_face_region(bm, geom=[f])
+    top = [v for v in r["geom"] if isinstance(v, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=top, vec=(0, y1 - y0, 0))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
+def side_prism(name, pts, y0, y1, material, mirror=False, bevel=0.006):
+    o = obj_from_bm(name, side_prism_bm(pts, y0, y1), material)
+    if mirror:
+        m = o.modifiers.new("Mirror", "MIRROR")
+        m.use_axis = (False, True, False)
+    if bevel:
+        bevel_mod(o, bevel)
+    return o
+
+
+def offset_poly(pts, d):
+    """Desplaza un contorno antihorario hacia dentro una distancia d (inglete en las esquinas)."""
+    out, n = [], len(pts)
+    for i in range(n):
+        p0, p1, p2 = Vector(pts[i - 1]), Vector(pts[i]), Vector(pts[(i + 1) % n])
+        e1, e2 = (p1 - p0).normalized(), (p2 - p1).normalized()
+        n1, n2 = Vector((-e1.y, e1.x)), Vector((-e2.y, e2.x))
+        m = (n1 + n2).normalized()
+        out.append(tuple(p1 + m * (d / max(0.2, m.dot(n1)))))
+    return out
+
+
+def ribbon(name, pts, d0, d1, y0, y1, material):
+    """Cinta fina que sigue un contorno: las líneas rojas de la hoja."""
+    a, b = offset_poly(pts, d0), offset_poly(pts, d1)
+    bm = bmesh.new()
+    va = [bm.verts.new((x, y0, z)) for x, z in a]
+    vb = [bm.verts.new((x, y0, z)) for x, z in b]
+    n = len(pts)
+    faces = [bm.faces.new((va[i], va[(i + 1) % n], vb[(i + 1) % n], vb[i])) for i in range(n)]
+    r = bmesh.ops.extrude_face_region(bm, geom=faces)
+    top = [v for v in r["geom"] if isinstance(v, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=top, vec=(0, y1 - y0, 0))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    o = obj_from_bm(name, bm, material)
+    m = o.modifiers.new("Mirror", "MIRROR")
+    m.use_axis = (False, True, False)
+    return o
+
+
+def gear_pts(cx, cz, r_in, r_out, teeth):
+    pts = []
+    for i in range(teeth):
+        a = 2 * math.pi * i / teeth
+        s = 2 * math.pi / teeth
+        for frac, r in ((0.0, r_in), (0.18, r_out), (0.5, r_out), (0.68, r_in)):
+            pts.append((cx + r * math.cos(a + s * frac), cz + r * math.sin(a + s * frac)))
+    return pts
+
+
+def x_cylinder(name, x0, x1, r, z, material, segs=16, y=0.0):
+    b = bmesh.new()
+    bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=segs, radius1=r, radius2=r, depth=x1 - x0)
+    bmesh.ops.rotate(b, verts=b.verts, cent=(0, 0, 0), matrix=Matrix.Rotation(math.radians(90), 3, "Y"))
+    bmesh.ops.translate(b, verts=b.verts, vec=((x0 + x1) / 2, y, z))
+    return bevel_mod(obj_from_bm(name, b, material), 0.004)
+
+
+def y_cylinder(name, x, z, r, y0, y1, material, segs=16):
+    b = bmesh.new()
+    bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=segs, radius1=r, radius2=r, depth=y1 - y0)
+    bmesh.ops.rotate(b, verts=b.verts, cent=(0, 0, 0), matrix=Matrix.Rotation(math.radians(90), 3, "X"))
+    bmesh.ops.translate(b, verts=b.verts, vec=(x, (y0 + y1) / 2, z))
+    return bevel_mod(obj_from_bm(name, b, material), 0.004)
+
+
+def weapon_mats():
+    return {
+        "negro": mat("Arma negro", (0.022, 0.024, 0.028), 0.5, 0.38),
+        "gris": mat("Arma grafito", (0.085, 0.09, 0.1), 0.7, 0.3),
+        "goma": mat("Goma", (0.03, 0.03, 0.032), 0, 0.7),
+        "rojo": mat("Linea roja", (0.8, 0.05, 0.05), 0, 0.3, (1.0, 0.05, 0.04), 6),
+        "azul": mat("Nucleo", (0.2, 0.6, 1.0), 0, 0.2, (0.08, 0.45, 1.0), 9),
+    }
+
+
+BLADE = [(-2.6, 0.03), (-2.3, -0.17), (-0.95, -0.17), (-0.8, -0.24), (0.0, -0.24), (0.0, 0.3),
+         (-0.75, 0.3), (-0.9, 0.24), (-2.3, 0.24)]
+RECEIVER = [(0.0, -0.3), (0.7, -0.3), (0.92, -0.12), (0.92, 0.22), (0.78, 0.38), (0.05, 0.38), (0.0, 0.33)]
+
+
+def build_weapon(M, W, paso):
+    """paso 1-2: blockout de cajas · 3: formas · 4: detalle · 5: acabado."""
+    objs = []
+    if paso <= 2:
+        g = M["armor"]
+        objs.append(side_prism("Hoja", box_pts(2.6, 0.54, -1.3, 0.03), -0.05, 0.05, g, bevel=0))
+        objs.append(side_prism("Cuerpo", box_pts(0.92, 0.68, 0.46, 0.04), -0.11, 0.11, g, bevel=0))
+        objs.append(x_cylinder("Empunadura", 0.92, 1.5, 0.075, 0.02, g, 8))
+        objs.append(side_prism("Culata", box_pts(0.45, 0.3, 1.72, 0.0), -0.08, 0.08, g, bevel=0))
+        objs.append(side_prism("Bastidor", box_pts(1.25, 0.09, 1.32, -0.2), -0.05, 0.05, g, bevel=0))
+        return objs
+    bev = 0.006 if paso >= 5 else 0
+    hoja = side_prism("Hoja", BLADE, -0.05, 0.05, W["gris"], bevel=bev)
+    cuerpo = side_prism("Cuerpo", RECEIVER, -0.11, 0.11, W["negro"], bevel=bev)
+    objs += [hoja, cuerpo]
+    objs.append(side_prism("Riel", box_pts(0.6, 0.05, 0.4, 0.405), -0.06, 0.06, W["gris"], bevel=bev))
+    for i, (x0, x1, r) in enumerate([(0.92, 1.04, 0.08), (1.04, 1.14, 0.072), (1.14, 1.26, 0.08), (1.26, 1.36, 0.072), (1.36, 1.5, 0.08)]):
+        objs.append(x_cylinder(f"Empunadura_{i}", x0, x1, r, 0.02, W["goma"]))
+    objs.append(side_prism("Bastidor", [(0.7, -0.3), (1.0, -0.24), (1.95, -0.24), (1.95, -0.15), (1.0, -0.15), (0.75, -0.21)],
+                           -0.05, 0.05, W["negro"], bevel=bev))
+    objs.append(side_prism("Gatillo", [(0.8, -0.3), (0.86, -0.3), (0.9, -0.42), (0.85, -0.42)], -0.015, 0.015, W["gris"], bevel=bev))
+    for z in (-0.11, 0.13):
+        objs.append(side_prism(f"Barra_{z}", box_pts(0.4, 0.035, 1.7, z), -0.035, 0.035, W["gris"], bevel=bev))
+    objs.append(x_cylinder("Tapa", 1.88, 1.96, 0.115, 0.01, W["negro"]))
+    if paso < 4:
+        return objs
+    # -- detalle: placas, líneas rojas, luces, ventana, engranaje, pistón y celda
+    placa = side_prism("Placa_hoja", offset_poly(BLADE, 0.06), 0.05, 0.068, W["negro"], mirror=True, bevel=bev)
+    objs.append(placa)
+    objs.append(ribbon("Linea_roja", BLADE, 0.032, 0.044, 0.05, 0.054, W["rojo"]))
+    objs.append(side_prism("Placa_cuerpo", offset_poly(RECEIVER, 0.05), 0.11, 0.125, W["gris"], mirror=True, bevel=bev))
+    objs.append(ribbon("Linea_roja_cuerpo", RECEIVER, 0.025, 0.035, 0.11, 0.114, W["rojo"]))
+    ventana = side_prism("Cortador_ventana", chamfer_rect(-2.12, -1.38, -0.04, 0.1, 0.06), -0.3, 0.3, W["gris"], bevel=0)
+    ventana.display_type = "WIRE"
+    ventana.hide_render = True
+    objs.append(ventana)  # el cortador viaja con el arma
+    for o in (hoja, placa):
+        b = o.modifiers.new("Boolean", "BOOLEAN")
+        b.object = ventana
+        b.solver = "EXACT"
+        o.modifiers.move(len(o.modifiers) - 1, 0)
+    objs.append(side_prism("Luz_ventana", offset_poly(chamfer_rect(-2.12, -1.38, -0.04, 0.1, 0.06), 0.02), -0.025, 0.025, W["azul"], bevel=0))
+    for z in (0.17, -0.11):
+        d = side_prism(f"Luces_{z}", chamfer_rect(-2.0, -1.88, z - 0.014, z + 0.014, 0.012), 0.066, 0.072, W["azul"], mirror=True, bevel=0)
+        a = d.modifiers.new("Array", "ARRAY")
+        a.count, a.use_relative_offset, a.use_constant_offset = 6, False, True
+        a.constant_offset_displace = (0.19, 0, 0)
+        d.modifiers.move(len(d.modifiers) - 1, 0)
+        objs.append(d)
+    objs.append(side_prism("Luces_cuerpo", chamfer_rect(0.15, 0.27, 0.2, 0.226, 0.01), 0.123, 0.13, W["azul"], mirror=True, bevel=0))
+    objs[-1].modifiers.new("Array", "ARRAY").count = 3
+    objs[-1].modifiers["Array"].relative_offset_displace = (1.45, 0, 0)
+    objs[-1].modifiers.move(1, 0)
+    objs.append(side_prism("Engranaje", gear_pts(0.62, 0.02, 0.13, 0.16, 12), 0.125, 0.16, W["gris"], mirror=True, bevel=bev))
+    objs.append(y_cylinder("Eje_engranaje", 0.62, 0.02, 0.05, -0.19, 0.19, W["negro"]))
+    objs.append(x_cylinder("Piston_camisa", 0.12, 0.45, 0.04, 0.475, W["negro"]))
+    objs.append(x_cylinder("Piston_vastago", 0.45, 0.7, 0.022, 0.475, W["gris"]))
+    for x in (0.14, 0.68):
+        objs.append(side_prism(f"Soporte_{x}", box_pts(0.05, 0.08, x, 0.45), -0.03, 0.03, W["gris"], bevel=bev))
+    c, cx = build_cell(cell_steps()[-1], 6, MATS(), final=True)
+    for o in [c] + cx:
+        o.scale = (0.16, 0.16, 0.16)
+        o.rotation_euler = (0, math.radians(90), 0)
+        o.location = (1.555, 0, 0.0)
+    objs += [c] + cx
+    return objs
+
+
+def lesson6():
+    def scene():
+        reset()
+        M = MATS()
+        W = weapon_mats()
+        workbench()
+        return M, W
+    # siluetas: lo primero que se lee de un diseño
+    for paso, nm in ((2, "silueta_bloque"), (5, "silueta_final")):
+        M, W = scene()
+        s = bpy.context.scene
+        s.display.shading.light = "FLAT"
+        s.display.shading.color_type = "SINGLE"
+        s.display.shading.single_color = (0.02, 0.02, 0.025)
+        s.display.shading.show_cavity = False
+        s.world.color = (0.8, 0.81, 0.83)
+        camera((-0.33, -7.5, 0.0), (-0.33, 0, 0.0), 45)
+        build_weapon(M, W, paso)
+        render(f"l6_{nm}", 1280, 480)
+    names = {2: "blockout", 3: "formas", 4: "detalle", 5: "final"}
+    for paso, nm in names.items():
+        M, W = scene()
+        camera((-0.1, -5.6, 1.5), (-0.33, 0, 0.0), 40)
+        objs = build_weapon(M, W, paso)
+        render(f"l6_{paso - 1:02d}_{nm}", 1280, 600)
+        export_glb(f"arma_{paso - 1:02d}", mesh_copies([o for o in objs if not o.hide_render]))
+        if paso == 5:
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "espada_arma.blend"))
+
+
+def lesson6_eevee():
+    reset()
+    M = MATS()
+    W = weapon_mats()
+    studio(M)
+    eevee()
+    objs = build_weapon(M, W, 5)
+    pivot = bpy.data.objects.new("Soporte", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    for o in objs:
+        if o.parent is None:
+            o.parent = pivot
+    pivot.location = (0.2, 0, 1.05)
+    pivot.rotation_euler = (0, math.radians(-6), 0)
+    camera((-0.1, -6.0, 1.25), (-0.15, 0, 1.0), 42)
+    render("l6_eevee", 1600, 800)
+
+
+# -------------------------------------------- Lección 7: brazo robótico
+
+def rounded_bar(x0, x1, w, seg=10):
+    """Perfil de barra con extremos semicirculares (XZ): la forma de toda bisagra."""
+    r = w / 2
+    pts = []
+    for i in range(seg + 1):
+        a = math.radians(90 + 180 * i / seg)
+        pts.append((x0 + r * math.cos(a), r * math.sin(a)))
+    for i in range(seg + 1):
+        a = math.radians(-90 + 180 * i / seg)
+        pts.append((x1 + r * math.cos(a), r * math.sin(a)))
+    return pts
+
+
+def empty(name, parent=None, loc=(0, 0, 0)):
+    e = bpy.data.objects.new(name, None)
+    bpy.context.scene.collection.objects.link(e)
+    e.parent = parent
+    e.location = loc
+    e.empty_display_size = 0.15
+    return e
+
+
+def parent_all(objs, parent):
+    for o in objs:
+        o.parent = parent
+
+
+def piston(name, a, b, l1, l2, W, M, r=0.045):
+    """Camisa en A mirando a B y vástago en B mirando a A: se alargan y encogen solos."""
+    parts = []
+    for nm, src, dst, length, rad, mt in ((name + "_camisa", a, b, l1, r, W["negro"]), (name + "_vastago", b, a, l2, r * 0.55, M["armor"])):
+        bm = bmesh.new()
+        bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=16, radius1=rad, radius2=rad, depth=length)
+        bmesh.ops.translate(bm, verts=bm.verts, vec=(0, 0, length / 2))
+        o = bevel_mod(obj_from_bm(nm, bm, mt), 0.004)
+        o.parent = src
+        c = o.constraints.new("DAMPED_TRACK")
+        c.target = dst
+        c.track_axis = "TRACK_Z"
+        parts.append(o)
+    return parts
+
+
+def build_arm(M, W, pose):
+    """Brazo con jerarquía de pivotes: Giro → Hombro → Codo → Muñeca."""
+    objs = []
+    giro = empty("Giro")
+    b = bmesh.new()
+    bmesh.ops.create_cone(b, cap_ends=True, segments=32, radius1=0.55, radius2=0.5, depth=0.12)
+    bmesh.ops.translate(b, verts=b.verts, vec=(0, 0, 0.06))
+    objs.append(bevel_mod(obj_from_bm("Base", b, W["negro"]), 0.01))
+    b = bmesh.new()
+    bmesh.ops.create_cone(b, cap_ends=True, segments=32, radius1=0.35, radius2=0.33, depth=0.26)
+    bmesh.ops.translate(b, verts=b.verts, vec=(0, 0, 0.25))
+    torreta = bevel_mod(obj_from_bm("Torreta", b, M["armor"]), 0.01)
+    lug_pts = [(-0.15, 0.3)] + [(0.15 * math.cos(math.radians(a)), 0.6 + 0.15 * math.sin(math.radians(a))) for a in range(0, 181, 15)]
+    lug_pts = [(0.15, 0.3)] + lug_pts[1:] + [(-0.15, 0.3)]
+    horquilla = side_prism("Horquilla_hombro", lug_pts, 0.1, 0.15, W["gris"], mirror=True)
+    pas1 = y_cylinder("Pasador_hombro", 0, 0.6, 0.05, -0.19, 0.19, W["negro"])
+    orejeta = side_prism("Orejeta_piston", rounded_bar(0.28, 0.28, 0.08), -0.06, 0.06, W["gris"])
+    orejeta.location = (0, 0, 0.42)
+    parent_all([torreta, horquilla, pas1, orejeta], giro)
+    objs += [torreta, horquilla, pas1, orejeta]
+
+    hombro = empty("Hombro", giro, (0, 0, 0.6))
+    brazo = [side_prism("Brazo_viga", rounded_bar(0, 0.82, 0.22), -0.06, 0.06, W["gris"]),
+             side_prism("Brazo_horquilla", rounded_bar(0.72, 1.0, 0.26), 0.085, 0.125, W["gris"], mirror=True),
+             side_prism("Brazo_blindaje", chamfer_rect(0.2, 0.72, -0.15, 0.15, 0.06), -0.14, 0.14, M["armor"]),
+             y_cylinder("Pasador_codo", 1.0, 0, 0.045, -0.16, 0.16, W["negro"]),
+             y_cylinder("Anclaje_codo", 0.35, 0, 0.03, -0.24, -0.14, W["negro"])]
+    parent_all(brazo, hombro)
+    objs += brazo
+
+    codo = empty("Codo", hombro, (1.0, 0, 0))
+    ante = [side_prism("Antebrazo_viga", rounded_bar(0, 0.75, 0.18), -0.07, 0.07, W["gris"]),
+            side_prism("Antebrazo_blindaje", chamfer_rect(0.15, 0.6, -0.12, 0.12, 0.05), -0.12, 0.12, M["armor"]),
+            x_cylinder("Muneca", 0.75, 0.83, 0.1, 0, W["negro"]),
+            y_cylinder("Anclaje_ante", 0.3, 0, 0.03, -0.24, -0.12, W["negro"])]
+    parent_all(ante, codo)
+    objs += ante
+
+    muneca = empty("Muneca", codo, (0.83, 0, 0))
+    dedo = [(0.1, 0.03), (0.26, 0.1), (0.33, 0.07), (0.3, 0.035), (0.12, -0.01)]
+    mano = [side_prism("Palma", chamfer_rect(0, 0.13, -0.1, 0.1, 0.03), -0.09, 0.09, W["gris"]),
+            side_prism("Dedo_sup", dedo, -0.04, 0.04, W["negro"]),
+            side_prism("Dedo_inf", [(x, -z) for x, z in reversed(dedo)], -0.04, 0.04, W["negro"])]
+    parent_all(mano, muneca)
+    objs += mano
+
+    # pistones con anclajes (empties) en cada pieza
+    a1 = empty("A_hombro", giro, (0.28, 0, 0.42))
+    b1 = empty("B_hombro", hombro, (0.4, 0, -0.11))
+    a2 = empty("A_codo", hombro, (0.35, -0.19, 0))
+    b2 = empty("B_codo", codo, (0.3, -0.19, 0))
+    objs += piston("Piston_hombro", a1, b1, 0.3, 0.3, W, M)
+    objs += piston("Piston_codo", a2, b2, 0.52, 0.47, W, M, r=0.04)
+
+    giro.rotation_euler = (0, 0, math.radians(pose[0]))
+    hombro.rotation_euler = (0, math.radians(pose[1]), 0)
+    codo.rotation_euler = (0, math.radians(pose[2]), 0)
+    muneca.rotation_euler = (0, math.radians(pose[3]), 0)
+    bpy.context.view_layer.update()
+    return objs, {"Hombro": hombro, "Codo": codo, "Muneca": muneca}
+
+
+POSES = {"a": (0, -40, 60, 10), "b": (0, -70, 100, 30), "c": (0, -20, 30, -20)}
+
+
+def lesson7():
+    def scene():
+        reset()
+        M = MATS()
+        W = weapon_mats()
+        workbench()
+        return M, W
+    for key, pose in POSES.items():
+        M, W = scene()
+        camera((1.0, -4.2, 1.5), (0.55, 0, 0.9), 40)
+        objs, piv = build_arm(M, W, pose)
+        render(f"l7_pose_{key}")
+        export_glb(f"brazo_{key}", mesh_copies(objs))
+        if key == "a":
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "brazo_robotico.blend"))
+    # pivotes: esferas rojas en el centro de cada pasador
+    M, W = scene()
+    camera((1.0, -4.2, 1.5), (0.55, 0, 0.9), 40)
+    objs, piv = build_arm(M, W, POSES["a"])
+    rojo = mat("Marcador", (1.0, 0.1, 0.1))
+    for e in piv.values():
+        b = bmesh.new()
+        bmesh.ops.create_uvsphere(b, u_segments=16, v_segments=8, radius=0.06)
+        s = obj_from_bm("Marcador", b, rojo, smooth=True)
+        s.location = e.matrix_world.translation
+        s.location.y = -0.3
+    render("l7_pivotes")
+    # primeros planos: bisagra y pistón
+    M, W = scene()
+    objs, piv = build_arm(M, W, POSES["a"])
+    camera((0.55, -1.25, 0.95), (0.05, 0, 0.6), 40)
+    render("l7_bisagra")
+    camera((1.35, -1.6, 1.15), (0.85, -0.19, 0.95), 40)
+    render("l7_piston")
+
+
+def lesson7_eevee():
+    reset()
+    M = MATS()
+    W = weapon_mats()
+    studio(M)
+    eevee()
+    build_arm(M, W, (-20, -45, 75, 15))
+    camera((1.9, -3.9, 1.6), (0.4, 0, 0.85), 45)
+    render("l7_eevee", 1600, 900)
+
+
+# -------------------------------------------- Lección 8: materiales y render
+
+def paint_material(name, paint, metal=(0.32, 0.33, 0.35), rough=0.42, wear=True, dirt=True):
+    """Pintura con variación de rugosidad, desgaste en bordes (nodo Bevel) y suciedad (AO). Solo Cycles."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    N, L = nt.nodes, nt.links
+    bsdf = N["Principled BSDF"]
+    # rugosidad que varía un poco: ninguna superficie real es uniforme
+    nz = N.new("ShaderNodeTexNoise")
+    nz.inputs["Scale"].default_value = 4
+    rmap = N.new("ShaderNodeMapRange")
+    rmap.inputs["To Min"].default_value = rough - 0.1
+    rmap.inputs["To Max"].default_value = rough + 0.1
+    L.new(nz.outputs["Fac"], rmap.inputs["Value"])
+    color_out, rough_out, metal_out = None, rmap.outputs["Result"], None
+    base = N.new("ShaderNodeRGB")
+    base.outputs[0].default_value = (*paint, 1)
+    color_out = base.outputs[0]
+    if wear:
+        bev = N.new("ShaderNodeBevel")
+        bev.inputs["Radius"].default_value = 0.03
+        geo = N.new("ShaderNodeNewGeometry")
+        dot = N.new("ShaderNodeVectorMath")
+        dot.operation = "DOT_PRODUCT"
+        L.new(bev.outputs["Normal"], dot.inputs[0])
+        L.new(geo.outputs["Normal"], dot.inputs[1])
+        edge = N.new("ShaderNodeMath")
+        edge.operation = "SUBTRACT"
+        edge.inputs[0].default_value = 1.0
+        L.new(dot.outputs["Value"], edge.inputs[1])
+        nz2 = N.new("ShaderNodeTexNoise")
+        nz2.inputs["Scale"].default_value = 12
+        nz2.inputs["Detail"].default_value = 8
+        mul = N.new("ShaderNodeMath")
+        mul.operation = "MULTIPLY"
+        L.new(edge.outputs["Value"], mul.inputs[0])
+        L.new(nz2.outputs["Fac"], mul.inputs[1])
+        mask = N.new("ShaderNodeMapRange")
+        mask.inputs["From Min"].default_value = 0.01
+        mask.inputs["From Max"].default_value = 0.05
+        L.new(mul.outputs["Value"], mask.inputs["Value"])
+        mix = N.new("ShaderNodeMixRGB")
+        mix.inputs["Color2"].default_value = (*metal, 1)
+        L.new(mask.outputs["Result"], mix.inputs["Fac"])
+        L.new(color_out, mix.inputs["Color1"])
+        color_out = mix.outputs["Color"]
+        rmix = N.new("ShaderNodeMixRGB")
+        rmix.inputs["Color2"].default_value = (0.22, 0.22, 0.22, 1)
+        L.new(mask.outputs["Result"], rmix.inputs["Fac"])
+        L.new(rough_out, rmix.inputs["Color1"])
+        rough_out = rmix.outputs["Color"]
+        metal_out = mask.outputs["Result"]
+    if dirt:
+        ao = N.new("ShaderNodeAmbientOcclusion")
+        ao.inputs["Distance"].default_value = 0.08
+        amap = N.new("ShaderNodeMapRange")
+        amap.inputs["To Min"].default_value = 0.45
+        L.new(ao.outputs["AO"], amap.inputs["Value"])
+        dmix = N.new("ShaderNodeMixRGB")
+        dmix.blend_type = "MULTIPLY"
+        dmix.inputs["Fac"].default_value = 1.0
+        L.new(color_out, dmix.inputs["Color1"])
+        L.new(amap.outputs["Result"], dmix.inputs["Color2"])
+        color_out = dmix.outputs["Color"]
+    L.new(color_out, bsdf.inputs["Base Color"])
+    L.new(rough_out, bsdf.inputs["Roughness"])
+    if metal_out:
+        L.new(metal_out, bsdf.inputs["Metallic"])
+    else:
+        bsdf.inputs["Metallic"].default_value = 0.1
+    return m
+
+
+def cycles_setup(samples=64):
+    s = bpy.context.scene
+    s.render.engine = "CYCLES"
+    s.cycles.device = "CPU"
+    s.cycles.samples = samples
+    s.cycles.use_denoising = True
+    s.world.color = (0.02, 0.02, 0.025)
+    s.view_settings.view_transform = "AgX"
+    s.view_settings.look = "AgX - Medium High Contrast"
+
+
+def glare(on=True):
+    s = bpy.context.scene
+    s.use_nodes = on
+    if not on:
+        return
+    nt = s.node_tree
+    rl, comp = nt.nodes["Render Layers"], nt.nodes["Composite"]
+    g = nt.nodes.new("CompositorNodeGlare")
+    g.glare_type = "FOG_GLOW"
+    g.threshold = 1.2
+    g.size = 7
+    nt.links.new(rl.outputs["Image"], g.inputs["Image"])
+    nt.links.new(g.outputs["Image"], comp.inputs["Image"])
+
+
+def showcase(M):
+    """La placa del módulo 3 y la celda del módulo 1, como en su render."""
+    p, cutters, extras = build_plate(M, 7)
+    pivot = bpy.data.objects.new("Soporte", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    for o in [p] + extras + cutters:
+        o.parent = pivot
+    pivot.rotation_euler = (math.radians(65), 0, math.radians(-12))
+    pivot.location = (0, 0, 0.62)
+    c, cx = build_cell(cell_steps()[-1], 6, M, final=True)
+    for o in [c] + cx:
+        o.scale = (0.42, 0.42, 0.42)
+        o.location = (1.35, -0.1, 0)
+    camera((1.1, -4.2, 1.3), (0.3, 0, 0.62), 50)
+
+
+def lesson8():
+    etapas = ["gris", "pintura", "desgaste", "emision", "luz_plana"]
+    for i, nm in enumerate(etapas, start=1):
+        reset()
+        M = MATS()
+        studio(M)
+        cycles_setup()
+        showcase(M)
+        gris = mat("Gris", (0.5, 0.5, 0.5), 0, 0.5)
+        apagado = mat("Emisivo apagado", (0.04, 0.05, 0.07), 0.2, 0.2)
+        detalle = i >= 3
+        naranja = paint_material("Pintura naranja", (0.85, 0.36, 0.08), rough=0.4, wear=detalle, dirt=detalle)
+        mats = {
+            "Blindaje": paint_material("Pintura blanca", (0.72, 0.73, 0.76), wear=detalle, dirt=detalle),
+            "Metal oscuro": paint_material("Pintura grafito", (0.05, 0.055, 0.06), metal=(0.5, 0.5, 0.5), rough=0.35, wear=detalle, dirt=detalle),
+        }
+        for o in bpy.data.objects:
+            if o.type != "MESH" or o.name == "Ciclorama":
+                continue
+            for slot in o.material_slots:
+                n = slot.material.name if slot.material else ""
+                if i == 1:
+                    slot.material = gris
+                elif n == "Blindaje" and o.name.startswith("Celda"):
+                    slot.material = naranja
+                elif n in mats:
+                    slot.material = mats[n]
+                elif n in ("Nucleo",) and i < 4:
+                    slot.material = apagado
+        glare(i >= 4)
+        if nm == "luz_plana":
+            for o in [o for o in bpy.data.objects if o.type == "LIGHT"]:
+                bpy.data.objects.remove(o)
+            sun = bpy.data.objects.new("Sol", bpy.data.lights.new("Sol", "SUN"))
+            bpy.context.scene.collection.objects.link(sun)
+            sun.data.energy = 3.5
+            sun.rotation_euler = (math.radians(75), 0, math.radians(15))
+        render(f"l8_{i:02d}_{nm}", 1100, 620)
+        if nm == "emision":
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "materiales_render.blend"))
+            # la misma escena en EEVEE: sin nodo Bevel ni AO de Cycles
+            eevee()
+            render("l8_eevee_mismo", 1100, 620)
+
+
+# ------------------------------------------------ Lección 9: el androide
+
+def cbox(name, size, center, material, chamfer=0.03, taper=None, rot=None):
+    """Caja con todas las aristas achaflanadas: la pieza base del blindaje del androide."""
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    bmesh.ops.scale(bm, vec=size, verts=bm.verts)
+    if taper:  # (factor X abajo, factor Y abajo): estrecha la parte inferior
+        for v in bm.verts:
+            if v.co.z < 0:
+                v.co.x *= taper[0]
+                v.co.y *= taper[1]
+    if chamfer:
+        bmesh.ops.bevel(bm, geom=list(bm.edges) + list(bm.verts), offset=chamfer, segments=1,
+                        affect="EDGES", profile=0.5, clamp_overlap=True)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    o = obj_from_bm(name, bm, material)
+    o.location = center
+    if rot:
+        o.rotation_euler = rot
+    return bevel_mod(o, 0.006) if chamfer else o
+
+
+def sphere(name, r, center, material):
+    b = bmesh.new()
+    bmesh.ops.create_uvsphere(b, u_segments=24, v_segments=12, radius=r)
+    o = obj_from_bm(name, b, material, smooth=True)
+    o.location = center
+    return o
+
+
+def android_mats():
+    return {
+        "blanco": mat("Blindaje blanco", (0.74, 0.75, 0.79), 0.2, 0.38),
+        "marco": mat("Estructura", (0.1, 0.105, 0.115), 0.6, 0.35),
+        "gris": mat("Gris medio", (0.32, 0.33, 0.36), 0.5, 0.35),
+        "azul": mat("Luz azul", (0.2, 0.6, 1.0), 0, 0.2, (0.1, 0.5, 1.0), 8),
+    }
+
+
+def build_android(M, A, nivel):
+    """nivel 1: blockout de cajas · 2: formas y articulaciones · 3: detalle y piezas de la ruta."""
+    o = []
+    ch = 0.0 if nivel == 1 else 1.0
+    blanco = A["blanco"] if nivel > 1 else M["armor"]
+    marco = A["marco"] if nivel > 1 else M["armor"]
+
+    def C(name, size, center, mt, chamfer=0.04, **kw):
+        o.append(cbox(name, size, center, mt, chamfer * ch, **kw))
+        return o[-1]
+
+    for s in (-1, 1):
+        x = 0.17 * s
+        C(f"Pie_{s}", (0.18, 0.34, 0.1), (x, -0.04, 0.05), marco, 0.03)
+        C(f"Espinilla_{s}", (0.21, 0.25, 0.46), (x, 0, 0.38), blanco, 0.06, taper=(0.82, 0.8))
+        C(f"Muslo_{s}", (0.19, 0.21, 0.4), (x, 0.0, 0.86), blanco, 0.05, taper=(0.85, 0.9))
+        if nivel > 1:
+            o.append(sphere(f"Tobillo_{s}", 0.065, (x, 0, 0.13), marco))
+            o.append(x_cylinder(f"Rodilla_{s}", x - 0.11, x + 0.11, 0.07, 0.635, marco))
+            C(f"Rodillera_{s}", (0.15, 0.08, 0.15), (x, -0.13, 0.64), blanco, 0.035, rot=(math.radians(-12), 0, 0))
+            o.append(sphere(f"Cadera_{s}", 0.08, (0.15 * s, 0, 1.08), marco))
+            C(f"Falda_{s}", (0.08, 0.22, 0.24), (0.28 * s, 0, 1.08), blanco, 0.03, rot=(0, math.radians(10 * s), 0))
+    C("Pelvis", (0.4, 0.25, 0.18), (0, 0, 1.13), marco, 0.04)
+    if nivel > 1:
+        C("Placa_pelvis", (0.14, 0.06, 0.17), (0, -0.14, 1.1), blanco, 0.025, taper=(0.6, 1))
+        for i, (r, z) in enumerate(((0.15, 1.24), (0.14, 1.29), (0.15, 1.34))):
+            b = bmesh.new()
+            bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=24, radius1=r, radius2=r, depth=0.045)
+            bmesh.ops.translate(b, verts=b.verts, vec=(0, 0, z))
+            o.append(bevel_mod(obj_from_bm(f"Abdomen_{i}", b, marco), 0.006))
+    else:
+        C("Abdomen", (0.28, 0.22, 0.16), (0, 0, 1.29), marco, 0)
+    C("Pecho", (0.62, 0.38, 0.42), (0, 0, 1.57), blanco, 0.07, taper=(0.72, 0.85))
+    for s in (-1, 1):
+        sx = 0.42 * s
+        piv = empty(f"Hombro_{s}", None, (sx, 0, 1.69))
+        parts = []
+        if nivel > 1:
+            parts.append(sphere(f"Hombro_bola_{s}", 0.09, (0, 0, 0), marco))
+            parts.append(cbox(f"Hombrera_{s}", (0.25, 0.3, 0.2), (0.05 * s, 0, 0.08), blanco, 0.06,
+                              rot=(0, math.radians(-15 * s), 0)))
+            parts.append(x_cylinder(f"Codo_{s}", -0.085, 0.085, 0.065, -0.42, marco))
+        parts.append(cbox(f"Biceps_{s}", (0.13, 0.14, 0.32), (0, 0, -0.23), blanco if nivel > 1 else blanco, 0.035 * ch))
+        parts.append(cbox(f"Antebrazo_{s}", (0.17, 0.18, 0.34), (0.005 * s, 0, -0.6), blanco, 0.05 * ch, taper=(0.8, 0.85)))
+        parts.append(cbox(f"Mano_{s}", (0.09, 0.12, 0.12), (0.01 * s, 0, -0.83), marco, 0.025 * ch))
+        if nivel > 2:
+            for k, y in enumerate((-0.04, -0.013, 0.013, 0.04)):
+                parts.append(cbox(f"Dedo_{s}_{k}", (0.022, 0.024, 0.085), (0.01 * s, y, -0.93), marco, 0.006))
+            parts.append(cbox(f"Pulgar_{s}", (0.025, 0.025, 0.07), (-0.035 * s, -0.06, -0.86), marco, 0.006,
+                              rot=(math.radians(20), 0, 0)))
+            d = cbox(f"Luz_antebrazo_{s}", (0.012, 0.06, 0.018), (0.088 * s, 0, -0.52), A["azul"], 0)
+            a = d.modifiers.new("Array", "ARRAY")
+            a.relative_offset_displace = (0, 0, -1.8)
+            a.count = 3
+            parts.append(d)
+        for p in parts:
+            p.parent = piv
+        piv.rotation_euler = (0, math.radians(-12 * s), 0)
+        o += parts
+    if nivel > 1:
+        C("Cuello", (0.12, 0.12, 0.12), (0, 0.01, 1.82), marco, 0.02)
+    if nivel == 1:
+        C("Cabeza", (0.24, 0.28, 0.3), (0, 0, 2.0), blanco, 0)
+    elif nivel == 2:
+        C("Cabeza", (0.24, 0.28, 0.3), (0, 0, 2.0), blanco, 0.06)
+    else:
+        head = build_head(M, 5)
+        head.data.materials[0] = A["blanco"]
+        extras = [e for e in head_extras(M) if e.name != "Cuello"]
+        piv = empty("Cabeza_pivote", None, (0, -0.01, 1.99))
+        for p in [head] + extras:
+            p.parent = piv
+        piv.scale = (0.3, 0.3, 0.3)
+        o += [head] + extras
+        # núcleo en el pecho (la celda del módulo 1 vista de frente) y luces
+        ring = y_cylinder("Nucleo_anillo", 0, 1.6, 0.1, -0.215, -0.17, A["marco"], 24)
+        core = y_cylinder("Nucleo_pecho", 0, 1.6, 0.065, -0.225, -0.2, A["azul"], 24)
+        o += [ring, core]
+        for s in (-1, 1):
+            o.append(cbox(f"Ventilacion_{s}", (0.12, 0.03, 0.08), (0.17 * s, -0.19, 1.71), A["marco"], 0.01))
+            o.append(cbox(f"Luz_espinilla_{s}", (0.06, 0.012, 0.018), (0.17 * s, -0.128, 0.42), A["azul"], 0))
+            a = o[-1].modifiers.new("Array", "ARRAY")
+            a.relative_offset_displace = (0, 0, -2.2)
+            a.count = 3
+        o.append(cbox("Mochila", (0.42, 0.2, 0.42), (0, 0.27, 1.56), A["gris"], 0.05))
+        for s in (-1, 1):
+            parts = piece_heatsink(M, {})
+            place(parts, (0.1 * s, 0.37, 1.68), 0, "Disipador")
+            for p in parts:
+                p.rotation_euler = (math.radians(-90), 0, 0)  # aletas hacia atrás
+            o += parts
+            t = x_cylinder(f"Propulsor_{s}", -0.1, 0.1, 0.06, 0, A["marco"])
+            t.rotation_euler = (0, math.radians(90), 0)
+            t.location = (0.12 * s, 0.33, 1.33)
+            o.append(t)
+            b = bmesh.new()
+            bmesh.ops.create_cone(b, cap_ends=True, segments=16, radius1=0.045, radius2=0.045, depth=0.02)
+            bmesh.ops.translate(b, verts=b.verts, vec=(0.12 * s, 0.33, 1.225))
+            o.append(obj_from_bm(f"Tobera_luz_{s}", b, A["azul"]))
+    bpy.context.view_layer.update()
+    return o
+
+
+def lesson9():
+    def scene():
+        reset()
+        M = MATS()
+        A = android_mats()
+        workbench()
+        return M, A
+    for nivel, nm in ((1, "blockout"), (2, "formas"), (3, "detalle")):
+        M, A = scene()
+        camera((1.55, -4.1, 1.55), (0, 0, 1.07), 38)
+        objs = build_android(M, A, nivel)
+        render(f"l9_{nivel:02d}_{nm}", 1000, 1000)
+        export_glb(f"androide_{nivel:02d}", mesh_copies(objs))
+        if nivel == 3:
+            bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BLEND, "androide.blend"))
+    # hoja de giro (turnaround): frente, perfil y espalda en ortográfica
+    for nm, loc in (("frente", (0, -6, 1.1)), ("perfil", (6, 0, 1.1)), ("espalda", (0, 6, 1.1))):
+        M, A = scene()
+        build_android(M, A, 3)
+        camera(loc, (0, 0, 1.1), 50)
+        bpy.context.scene.camera.data.type = "ORTHO"
+        bpy.context.scene.camera.data.ortho_scale = 2.5
+        render(f"l9_{nm}", 700, 1000)
+
+
+def lesson9_eevee():
+    reset()
+    M = MATS()
+    A = android_mats()
+    studio(M)
+    eevee()
+    build_android(M, A, 3)
+    camera((1.5, -5.4, 1.5), (0, 0, 1.1), 50)
+    render("l9_eevee", 1600, 1000)
+
+
+if MODE == "m9w":
+    lesson9()
+if MODE == "m9":
+    lesson9()
+    lesson9_eevee()
+if MODE == "m8":
+    lesson8()
+if MODE == "m7":
+    lesson7()
+    lesson7_eevee()
+if MODE == "m6":
+    lesson6()
+    lesson6_eevee()
 if MODE == "m5w":
     lesson5()
 if MODE == "m5":

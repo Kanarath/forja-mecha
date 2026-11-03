@@ -304,6 +304,12 @@ forja-visor { display: block; margin: 22px 0; }
 .lightbox.on { display: grid; }
 .lightbox img { max-height: 92vh; width: auto; }
 
+/* galería de la portada */
+.galeria a { display: block; color: var(--text); }
+.galeria img.shot { aspect-ratio: 16 / 10; object-fit: cover; cursor: pointer; transition: filter .2s; }
+.galeria a:hover img.shot { filter: brightness(1.15); }
+.galeria span { display: block; font-family: var(--font-head); font-weight: 600; margin-top: 8px; }
+
 footer { border-top: 1px solid var(--line); padding: 32px 0; color: var(--muted); font-size: .88rem; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
 

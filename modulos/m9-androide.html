@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>09 · Androide · Forja Mecha</title>
+  <meta name="description" content="Proyecto final de Forja Mecha: diseña y modela un androide completo en Blender combinando todo lo aprendido, desde el blockout hasta el render.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m9-androide">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 09 · Proyecto final</div>
+      <h1>Androide</h1>
+      <p style="color:var(--muted);max-width:680px">Todo lo que has forjado, junto. Un androide completo de 2 metros, con cabeza subdividida, núcleo de energía, blindaje sobre una estructura, articulaciones reales y mochila de kitbash. No es un tutorial para copiar: es <strong>el método</strong> para que construyas el tuyo.</p>
+      <div class="meta"><span>~10–20 horas, a tu ritmo</span><span>Nivel: todo lo anterior</span><span>Proyecto: tu androide</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#plan">El plan de piezas</a>
+      <a href="#visor">El androide en 3D</a>
+      <a href="#p1">1 · Blockout</a>
+      <a href="#p2">2 · Proporciones</a>
+      <a href="#p3">3 · Estructura y blindaje</a>
+      <a href="#p4">4 · Detalle</a>
+      <a href="#p5">5 · Pose</a>
+      <a href="#p6">6 · Render</a>
+      <a href="#turnaround">Hoja de giro</a>
+      <a href="#siguiente">Y ahora, vuela</a>
+      <a href="#reto">Reto final</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l9_eevee.webp" alt="Androide blanco y negro con núcleo azul en el pecho, visor azul y cresta amarilla en V" loading="lazy">
+          <figcaption>El androide de referencia de este módulo, montado con las piezas y técnicas de la ruta. El tuyo será distinto: esa es la idea.</figcaption>
+        </figure>
+      </section>
+
+      <section id="plan">
+        <h2>El plan de piezas <span class="tag">// producción</span></h2>
+        <p>Un personaje completo abruma si lo ves como un todo. Divídelo en piezas y cada pieza será un módulo que ya dominas:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Parte</th><th>Técnica</th><th>Módulo</th></tr>
+            <tr><td><strong>Cabeza</strong></td><td>Subdivisión + support loops, visor emisivo, cresta en V</td><td><a href="m4-cabeza-robot.html">04</a></td></tr>
+            <tr><td><strong>Núcleo del pecho</strong></td><td>Inset/Extrude, emisivo, anillo</td><td><a href="m1-celda-energia.html">01</a></td></tr>
+            <tr><td><strong>Placas de blindaje</strong></td><td>Chaflanes, líneas de panel, luces incrustadas</td><td><a href="m3-placa-blindaje.html">03</a></td></tr>
+            <tr><td><strong>Sombreado limpio</strong></td><td>Bevel + Harden Normals + Weighted Normal en todo</td><td><a href="m2-sombreado.html">02</a></td></tr>
+            <tr><td><strong>Mochila</strong></td><td>Kitbash: disipadores, módulos y propulsores</td><td><a href="m5-placa-base.html">05</a></td></tr>
+            <tr><td><strong>Silueta y formas</strong></td><td>Blockout, lenguaje de formas, reparto del detalle</td><td><a href="m6-espada-arma.html">06</a></td></tr>
+            <tr><td><strong>Articulaciones</strong></td><td>Pivotes, jerarquía y pistones</td><td><a href="m7-brazo-robotico.html">07</a></td></tr>
+            <tr><td><strong>Materiales y render</strong></td><td>Pintura, desgaste, emisivos y estudio</td><td><a href="m8-materiales-render.html">08</a></td></tr>
+          </table>
+        </div>
+        <div class="note tip"><p><strong>Organízate en colecciones:</strong> <code>Cabeza</code>, <code>Torso</code>, <code>Brazo_D</code>, <code>Pierna_D</code>, <code>Mochila</code>, <code>Cortadores</code>… Con 100+ objetos, el Outliner ordenado te salva la vida. Ocultar una colección entera (el ojo) te deja trabajar sin estorbos.</p></div>
+      </section>
+
+      <section id="visor">
+        <h2>Gíralo por fases <span class="tag">// 3D</span></h2>
+        <forja-visor data-malla="off" data-vista="0.45,0.15,1" data-distancia="1.6"
+          data-modelos="androide_01,androide_02,androide_03"
+          data-etiquetas="1 Blockout|2 Formas|3 Detalle"
+          data-notas="Blockout: 15 cajas. Ya se lee como robot humanoide.|Formas: chaflanes, estrechamientos, articulaciones visibles y blindaje blanco sobre estructura oscura.|Detalle: cabeza del módulo 4, núcleo, luces, manos, mochila con disipadores y propulsores."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Blockout</h3></div>
+          <figure><img src="../assets/img/l9_01_blockout.webp" alt="Blockout del androide hecho con cajas" loading="lazy"></figure>
+          <ol>
+            <li>Altura total de unos 2 m (escala humana grande). Una caja por masa: pies, espinillas, muslos, pelvis, abdomen, pecho, cabeza, brazos y antebrazos.</li>
+            <li><strong>Solo modela la mitad derecha</strong> y añade un modificador <strong>Mirror</strong> en X a cada pieza, con <em>Mirror Object</em> = un Empty en el centro del cuerpo. Todo lo que cambies en un lado aparece en el otro.</li>
+            <li>No pases de aquí hasta que la silueta te convenza (modo silueta del módulo 6).</li>
+          </ol>
+          <div class="note tip"><p><strong>Truco:</strong> pon un maniquí humano de referencia al lado (<kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → Monkey escalado, o una persona en imagen de referencia de 1,8 m) para no perder la escala.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Proporciones mecha</h3></div>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Rasgo</th><th>Efecto</th></tr>
+              <tr><td><strong>Hombros anchos</strong> con hombreras grandes</td><td>Fuerza y presencia; es lo primero que se lee de un mecha.</td></tr>
+              <tr><td><strong>Cintura estrecha</strong> (abdomen segmentado)</td><td>Contraste con el pecho: forma de «V» heroica.</td></tr>
+              <tr><td><strong>Pecho que se estrecha hacia abajo</strong> (taper)</td><td>Refuerza la V. En Blender: selecciona la fila de abajo y <kbd>S</kbd> <code>0.75</code>.</td></tr>
+              <tr><td><strong>Cabeza pequeña</strong></td><td>Hace al robot más grande e imponente. Las cabezas grandes lo vuelven «mono».</td></tr>
+              <tr><td><strong>Espinillas y pies grandes</strong></td><td>Estabilidad visual: parece que aguanta su peso.</td></tr>
+            </table>
+          </div>
+          <figure><img src="../assets/img/l9_02_formas.webp" alt="Androide con formas achaflanadas y articulaciones" loading="lazy"></figure>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Estructura y blindaje</h3></div>
+          <p>El secreto de los diseños tipo Gundam es que hay <strong>dos capas</strong>:</p>
+          <ul>
+            <li><strong>Estructura interna</strong> (oscura): articulaciones, abdomen segmentado, cuello, manos. Es «el esqueleto mecánico».</li>
+            <li><strong>Blindaje</strong> (blanco): placas que cubren la estructura, con huecos en las articulaciones para que se vea el mecanismo.</li>
+          </ul>
+          <ol>
+            <li>Cada caja del blockout: modo edición, <kbd>A</kbd>, <kbd>Ctrl</kbd>+<kbd>B</kbd> con 1 segmento → todas las aristas achaflanadas.</li>
+            <li>Articulaciones: esferas en hombros, caderas y tobillos, y cilindros en codos y rodillas (bisagras del módulo 7).</li>
+            <li>Separa el blindaje de las articulaciones con huecos: el oscuro se ve entre el blanco.</li>
+            <li>Rodilleras y hombreras ligeramente giradas: las piezas en ángulo dan dinamismo.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Detalle</h3></div>
+          <figure><img src="../assets/img/l9_03_detalle.webp" alt="Androide con cabeza, núcleo, luces, manos y mochila" loading="lazy"></figure>
+          <ol>
+            <li><strong>Cabeza:</strong> <code>File → Append</code> de tu cabeza del módulo 4, escalada. O arrástrala desde tu biblioteca.</li>
+            <li><strong>Núcleo:</strong> un anillo oscuro y un disco emisivo en el centro del pecho. Es el punto focal.</li>
+            <li><strong>Luces:</strong> guiones emisivos con Array en antebrazos y espinillas, la misma luz azul en todo el cuerpo.</li>
+            <li><strong>Manos:</strong> palma + cuatro dedos + pulgar, todos cajas achaflanadas. Con dedos sencillos basta: el ojo no se detiene en ellos.</li>
+            <li><strong>Mochila:</strong> una caja con disipadores y dos propulsores con tobera emisiva, piezas de tu kit del módulo 5.</li>
+            <li><strong>Líneas de panel</strong> (opcional): cortadores del módulo 3 sobre las placas grandes (pecho y espinillas).</li>
+          </ol>
+          <div class="note why"><p><strong>Reparto:</strong> mira el render: el detalle se concentra en el pecho, la cabeza y las articulaciones. Muslos y espinillas tienen grandes zonas limpias. Es el 70/30 del módulo 5.</p></div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Pose</h3></div>
+          <ol>
+            <li>Pon el origen de cada pieza (o un Empty) en el centro de su articulación (módulo 7).</li>
+            <li>Jerarquía: pelvis → torso → hombro → brazo → antebrazo → mano, y pelvis → muslo → espinilla → pie.</li>
+            <li>Empieza en «pose A»: brazos separados unos 12°, como en el render. Es la pose de trabajo estándar.</li>
+            <li>Para el render final, prueba una pose con peso: el cuerpo apoyado más en una pierna, el torso girado y la cabeza mirando a cámara. O ponle tu espada-arma del módulo 6 en la mano.</li>
+            <li>Si quieres animarlo, pasa la jerarquía a un <strong>Armature</strong> (módulo 7, paso 6).</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Render</h3></div>
+          <ol>
+            <li>Materiales del módulo 8: pintura blanca con desgaste en los bordes, estructura grafito y emisivos azules.</li>
+            <li>Estudio del módulo 0, con la contraluz fuerte para recortar la silueta.</li>
+            <li>Cámara: focal larga (50–85 mm) y ligeramente desde abajo, para que el robot parezca grande.</li>
+            <li>Glare en el compositor para que brillen el núcleo y el visor.</li>
+          </ol>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>androide.blend</strong><small>El androide completo, con los brazos colgando de Empties en los hombros para que puedas posarlos.</small></div>
+            <a class="btn small ghost" href="../assets/blend/androide.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="turnaround">
+        <h2>Hoja de giro <span class="tag">// presentación</span></h2>
+        <p>Así se presentan los diseños de personajes: frente, perfil y espalda en vista ortográfica. Te sirve para revisar proporciones y para tu portfolio.</p>
+        <div class="grid c3">
+          <figure style="margin:0"><img src="../assets/img/l9_frente.webp" alt="Androide de frente" loading="lazy"><figcaption>Frente</figcaption></figure>
+          <figure style="margin:0"><img src="../assets/img/l9_perfil.webp" alt="Androide de perfil" loading="lazy"><figcaption>Perfil: la mochila y la profundidad del pecho</figcaption></figure>
+          <figure style="margin:0"><img src="../assets/img/l9_espalda.webp" alt="Androide de espalda" loading="lazy"><figcaption>Espalda: disipadores y propulsores</figcaption></figure>
+        </div>
+        <div class="note tip"><p><strong>Cámara ortográfica:</strong> en las propiedades de la cámara, <em>Type: Orthographic</em> y ajusta el <em>Orthographic Scale</em> para que quepa el personaje. Haz 3 cámaras y cambia entre ellas con <kbd>Ctrl</kbd>+<kbd>Num 0</kbd>.</p></div>
+      </section>
+
+      <section id="siguiente">
+        <h2>Y ahora, vuela <span class="tag">// siguiente nivel</span></h2>
+        <p>Has terminado la ruta. Con lo que sabes puedes modelar casi cualquier mecha. Ideas para seguir creciendo, todas gratuitas:</p>
+        <div class="grid c2">
+          <div class="card"><h3>Un androide con tu sello</h3><p>Repite este módulo con tu propio diseño: otro lenguaje de formas, otra paleta y otra silueta. Es el mejor ejercicio que existe.</p></div>
+          <div class="card"><h3>Detalle por capas</h3><p>Líneas de panel en cada placa, decals (texto, números de serie) con planos y texturas de imagen, y pernos en cada junta.</p></div>
+          <div class="card"><h3>Animación</h3><p>Armature + IK en las piernas y un ciclo de caminar sencillo. Tu robot cobra vida.</p></div>
+          <div class="card"><h3>Escena</h3><p>Pon a tu androide en un hangar hecho con tu kit, con la espada-arma colgada de un soporte. Un render de escena completo.</p></div>
+          <div class="card"><h3>Geometry Nodes</h3><p>Repartir tornillos, cables o greebles proceduralmente. Es el siguiente gran salto de Blender.</p></div>
+          <div class="card"><h3>El manual oficial</h3><p><a href="https://docs.blender.org/manual/es/latest/" target="_blank" rel="noopener">docs.blender.org</a>: gratuito, en castellano y completísimo. Úsalo cuando quieras saber qué hace cada opción.</p></div>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto final: tu androide <span class="tag">// checklist</span></h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="plan"><span>Lista de piezas y colecciones organizadas</span></label></li>
+          <li><label><input type="checkbox" data-id="blockout"><span>Blockout con Mirror y silueta aprobada</span></label></li>
+          <li><label><input type="checkbox" data-id="proporciones"><span>Proporciones mecha: hombros, cintura, cabeza y pies</span></label></li>
+          <li><label><input type="checkbox" data-id="capas"><span>Estructura oscura + blindaje con huecos en las articulaciones</span></label></li>
+          <li><label><input type="checkbox" data-id="cabeza"><span>Cabeza propia con subdivisión y visor o ojos emisivos</span></label></li>
+          <li><label><input type="checkbox" data-id="foco"><span>Un punto focal claro (núcleo, visor…) y zonas de descanso</span></label></li>
+          <li><label><input type="checkbox" data-id="kit"><span>Piezas reutilizadas de tu biblioteca del Asset Browser</span></label></li>
+          <li><label><input type="checkbox" data-id="articulado"><span>Articulado: puedo cambiar la pose girando hombros, codos y rodillas</span></label></li>
+          <li><label><input type="checkbox" data-id="materiales"><span>Materiales con pintura, desgaste y emisivos</span></label></li>
+          <li><label><input type="checkbox" data-id="turnaround"><span>Hoja de giro: frente, perfil y espalda</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Render final en pose que me guste de verdad</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>
