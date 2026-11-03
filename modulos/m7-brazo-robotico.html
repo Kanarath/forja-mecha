@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>07 · Brazo robótico · Forja Mecha</title>
+  <meta name="description" content="Mecánica creíble en Blender: bisagras, pivotes, jerarquías, pistones que se estiran solos con Damped Track, límites de rotación y una introducción al rigging.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m7-brazo-robotico">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo 07</div>
+      <h1>Brazo robótico</h1>
+      <p style="color:var(--muted);max-width:680px">Un robot no solo tiene que parecer de metal: tiene que parecer que <strong>se mueve</strong>. En este módulo construirás un brazo articulado de verdad: gira sobre sus pasadores, y sus pistones se estiran y se encogen solos al cambiar de pose.</p>
+      <div class="meta"><span>~2,5 horas</span><span>Nivel: medio</span><span>Herramientas: origen · Parent · Damped Track · Limit Rotation · Armature</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#visor">El brazo en 3D</a>
+      <a href="#p1">1 · La bisagra</a>
+      <a href="#p2">2 · Pivotes</a>
+      <a href="#p3">3 · Jerarquía</a>
+      <a href="#p4">4 · Pistones</a>
+      <a href="#p5">5 · Límites</a>
+      <a href="#p6">6 · Armature (rigging)</a>
+      <a href="#credibilidad">Mecánica creíble</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l7_eevee.webp" alt="Brazo robótico blanco y negro con dos pistones hidráulicos y pinza" loading="lazy">
+          <figcaption>Base giratoria, hombro, codo, muñeca y pinza. Dos pistones hidráulicos que acompañan el movimiento.</figcaption>
+        </figure>
+        <figure data-tabs>
+          <div class="tabs">
+            <button class="on" data-src="../assets/img/l7_pose_a.webp" data-cap="Pose A: hombro −40°, codo 60°.">Pose A</button>
+            <button data-src="../assets/img/l7_pose_b.webp" data-cap="Pose B: hombro −70°, codo 100°. El pistón del hombro se ha alargado y el del codo se ha recogido.">Pose B</button>
+            <button data-src="../assets/img/l7_pose_c.webp" data-cap="Pose C: brazo casi extendido. Los pistones siguen conectados sin tocar nada.">Pose C</button>
+          </div>
+          <img src="../assets/img/l7_pose_a.webp" alt="Brazo en diferentes poses" loading="lazy">
+          <figcaption>Pose A: hombro −40°, codo 60°.</figcaption>
+        </figure>
+        <p>Es el mismo modelo en las tres imágenes: solo cambian 2 o 3 rotaciones. Esto es lo que necesitarás para el androide (hombros, codos, rodillas) y para cualquier mecanismo.</p>
+      </section>
+
+      <section id="visor">
+        <h2>Gíralo en cada pose <span class="tag">// 3D</span></h2>
+        <forja-visor data-malla="off" data-vista="0.35,0.3,1" data-distancia="1.25"
+          data-modelos="brazo_a,brazo_b,brazo_c"
+          data-etiquetas="Pose A|Pose B|Pose C"
+          data-notas="Pose A. Mira los pistones: están anclados a dos piezas distintas.|Pose B. Mismo modelo; el pistón del hombro se ha alargado.|Pose C. Brazo extendido."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>La bisagra: horquilla, pasador y orejeta</h3></div>
+          <figure><img src="../assets/img/l7_bisagra.webp" alt="Primer plano de la bisagra del hombro" loading="lazy"></figure>
+          <p>Casi toda articulación mecánica es la misma pieza:</p>
+          <ul>
+            <li><strong>Horquilla:</strong> dos placas paralelas con el extremo redondeado. Se hace con un perfil + Solidify (módulo 6) y un Mirror en Y para la segunda placa.</li>
+            <li><strong>Orejeta:</strong> el extremo redondeado de la otra pieza, que se mete entre las placas.</li>
+            <li><strong>Pasador:</strong> un cilindro que atraviesa las tres y sobresale un poco por cada lado.</li>
+          </ul>
+          <ol>
+            <li>El extremo redondeado: un cilindro de 20–24 lados en vista frontal; en modo edición, borra la mitad de abajo y une lo que queda con una caja (<kbd>F</kbd> para rellenar, <kbd>E</kbd> para alargar).</li>
+            <li>El centro del redondeo es <strong>exactamente</strong> donde irá el pasador. Apunta sus coordenadas en el panel <kbd>N</kbd>.</li>
+            <li>Deja <strong>holgura</strong>: unos milímetros entre la orejeta y las placas. Si se tocan, parece soldado y no articulado.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Pivotes: el origen en el centro del pasador</h3></div>
+          <figure><img src="../assets/img/l7_pivotes.webp" alt="Brazo con esferas rojas en los centros de giro" loading="lazy"><figcaption>Las esferas rojas marcan los pivotes de hombro, codo y muñeca. Cada pieza gira alrededor de su origen, y su origen está en el centro del pasador.</figcaption></figure>
+          <ol>
+            <li>Selecciona el pasador del hombro y pulsa <kbd>Shift</kbd>+<kbd>S</kbd> → <strong>Cursor to Selected</strong>: el cursor 3D salta a su centro.</li>
+            <li>Selecciona la pieza del brazo → menú <code>Object → Set Origin → Origin to 3D Cursor</code>.</li>
+            <li>Comprueba: <kbd>R</kbd> <kbd>Y</kbd> y mueve el ratón. Si el brazo gira alrededor del pasador, está bien. Si «orbita» alrededor de otro punto, el origen está mal.</li>
+            <li>Repite en cada articulación.</li>
+          </ol>
+          <div class="note warn"><p><strong>Error típico:</strong> si el origen está en el centro de la pieza (lo normal al crearla), al girarla se separa del pasador. Es el fallo número uno al articular robots.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Jerarquía: cada pieza arrastra a las siguientes</h3></div>
+          <p>Cuando giras el hombro, el antebrazo y la pinza tienen que ir detrás. Eso es <strong>emparentar</strong>:</p>
+          <ol>
+            <li>Selecciona el <em>hijo</em> (antebrazo), luego con <kbd>Shift</kbd> el <em>padre</em> (brazo), y pulsa <kbd>Ctrl</kbd>+<kbd>P</kbd> → <strong>Object (Keep Transform)</strong>.</li>
+            <li>Cadena completa: <strong>Base → Torreta → Brazo → Antebrazo → Pinza</strong>. Las piezas pequeñas (pasadores, blindajes) se emparentan con la pieza a la que pertenecen.</li>
+            <li>Para la base giratoria: la torreta gira en <kbd>R</kbd> <kbd>Z</kbd> y todo lo demás la sigue.</li>
+          </ol>
+          <div class="note tip"><p><strong>Truco limpio:</strong> en vez de emparentar directamente las mallas, crea un <strong>Empty</strong> (<kbd>Shift</kbd>+<kbd>A</kbd> → Empty → Plain Axes) en cada pivote y emparenta las piezas a él. Así giras el Empty y nunca tocas los orígenes de las mallas. Es como está hecho el <code>.blend</code> de este módulo.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Pistones que se estiran solos</h3></div>
+          <figure><img src="../assets/img/l7_piston.webp" alt="Primer plano del pistón entre brazo y antebrazo" loading="lazy"></figure>
+          <p>Un pistón conecta <strong>dos piezas que se mueven por separado</strong>. El truco clásico usa dos partes que se miran entre sí:</p>
+          <ol>
+            <li><strong>Anclajes:</strong> pon un Empty en cada extremo. El de la camisa se emparenta con el brazo y el del vástago con el antebrazo.</li>
+            <li><strong>Camisa</strong> (cilindro grueso y oscuro): modélala a lo largo de su eje Z, con el origen en la base. Emparéntala con su anclaje.</li>
+            <li>Pestaña <em>Object Constraints</em> → Add → <strong>Damped Track</strong>: Target = el anclaje del otro extremo y <strong>Track Axis: Z</strong>. Ahora la camisa siempre apunta al otro extremo.</li>
+            <li><strong>Vástago</strong> (cilindro fino y claro): lo mismo, pero desde el otro anclaje y apuntando al primero.</li>
+            <li>Mueve el codo: los dos cilindros se deslizan uno dentro del otro.</li>
+          </ol>
+          <div class="note why"><p><strong>Las longitudes:</strong> la suma de camisa + vástago tiene que superar la distancia máxima entre anclajes, para que nunca se separen. Y cada una por separado tiene que ser menor que la distancia mínima, para que el vástago no asome por detrás. Prueba las poses extremas.</p></div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Límites de rotación</h3></div>
+          <ol>
+            <li>En el panel <kbd>N</kbd>, pulsa el <strong>candado</strong> de los ejes que no deban girar (el codo solo gira en Y).</li>
+            <li>Constraint <strong>Limit Rotation</strong>: activa Y con un mínimo y un máximo (por ejemplo, el codo de 0° a 110°). Así nunca atravesará el brazo.</li>
+            <li>Activa <em>Affect Transform</em> para que el límite se note mientras rotas, no solo en el resultado.</li>
+          </ol>
+          <div class="note tip"><p><strong>Busca los topes:</strong> gira cada articulación hasta que choque y apunta el ángulo. Esos son tus límites. En diseño mecánico real se hace igual.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Armature: el siguiente nivel</h3></div>
+          <p>Las jerarquías de objetos funcionan muy bien para máquinas. Para el androide, o para animar con comodidad, Blender tiene los <strong>huesos</strong>:</p>
+          <ol>
+            <li><kbd>Shift</kbd>+<kbd>A</kbd> → <strong>Armature</strong>. En modo edición, coloca la cabeza del hueso en el pasador del hombro y la punta en el del codo.</li>
+            <li><kbd>E</kbd> desde la punta extruye el siguiente hueso (codo → muñeca), ya encadenado.</li>
+            <li>Emparenta cada pieza con su hueso: selecciona la pieza, luego el armature, entra en <strong>Pose Mode</strong> (<kbd>Ctrl</kbd>+<kbd>Tab</kbd>), selecciona el hueso y <kbd>Ctrl</kbd>+<kbd>P</kbd> → <strong>Bone</strong>.</li>
+            <li>En Pose Mode, <kbd>R</kbd> en un hueso gira su pieza. Los pistones con Damped Track siguen funcionando igual.</li>
+            <li>Bonus: un constraint <strong>IK</strong> en el último hueso hace que la pinza siga a un objetivo y el brazo se doble solo.</li>
+          </ol>
+          <div class="note free"><p><strong>Animar:</strong> pon una pose, pulsa <kbd>I</kbd> sobre los huesos para guardar un fotograma clave, avanza en la línea de tiempo, cambia la pose y vuelve a pulsar <kbd>I</kbd>. Con <kbd>Espacio</kbd> lo reproduces. Tu brazo ya se mueve.</p></div>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>brazo_robotico.blend</strong><small>El brazo con la jerarquía de Empties y los pistones con Damped Track. Rota los Empties «Hombro», «Codo» y «Muneca».</small></div>
+            <a class="btn small ghost" href="../assets/blend/brazo_robotico.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="credibilidad">
+        <h2>Mecánica creíble <span class="tag">// diseño</span></h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Pregunta</th><th>Si la respuesta es «no»…</th></tr>
+            <tr><td>¿Cada pieza que se mueve tiene un pasador o un eje visible?</td><td>Parecerá un muñeco de plastilina. Añade el pasador.</td></tr>
+            <tr><td>¿Hay sitio para girar sin atravesar nada?</td><td>Prueba los extremos y recorta formas o añade holgura.</td></tr>
+            <tr><td>¿Hay algo que «empuje»? (pistón, motor, engranaje)</td><td>El brazo parecerá de juguete. Un pistón le da fuerza.</td></tr>
+            <tr><td>¿Hay piezas fijas y piezas móviles distinguibles?</td><td>Usa material: blindaje claro en lo que se mueve y estructura oscura.</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu mecanismo <span class="tag">// checklist</span></h2>
+        <p>Diseña el <strong>brazo de tu androide</strong> (hombro, codo y mano), o una pierna con rodilla y tobillo. Lo usarás en el módulo 9.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="bisagra"><span>Bisagra con horquilla, orejeta, pasador y holgura</span></label></li>
+          <li><label><input type="checkbox" data-id="origen"><span>Cada pieza gira alrededor de su pasador (origen o Empty bien colocados)</span></label></li>
+          <li><label><input type="checkbox" data-id="jerarquia"><span>Jerarquía completa: girar el hombro mueve todo lo demás</span></label></li>
+          <li><label><input type="checkbox" data-id="piston"><span>Al menos un pistón con Damped Track que funciona en todas las poses</span></label></li>
+          <li><label><input type="checkbox" data-id="limites"><span>Límites de rotación sin atravesar piezas</span></label></li>
+          <li><label><input type="checkbox" data-id="poses"><span>Tres renders en tres poses distintas</span></label></li>
+          <li><label><input type="checkbox" data-id="armature"><span>Extra: la misma jerarquía con un Armature y una animación corta</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

@@ -15,7 +15,7 @@ Cada módulo termina con una pieza hecha en Blender. Las imágenes y los modelos
 | 04 | Cabeza de robot (subdivisión) | ✅ |
 | 05 | Placa base sci-fi (kitbash) | ✅ |
 | 06 | Espada-arma (diseño de formas) | ✅ |
-| 07 | Brazo robótico (mecánica y rigging) | 🔨 |
+| 07 | Brazo robótico (mecánica y rigging) | ✅ |
 | 08 | Materiales y render | 🔨 |
 | 09 | Androide (proyecto final) | 🔨 |
 
