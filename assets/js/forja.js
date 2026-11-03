@@ -11,6 +11,10 @@ export const MODULOS = [
   { n: 7, slug: "m7-brazo-robotico", titulo: "Brazo robótico", desc: "Pistones, bisagras, rótulas y rigging básico con huesos.", proyecto: "Brazo articulado", listo: true },
   { n: 8, slug: "m8-materiales-render", titulo: "Materiales y render", desc: "Metal procedural, desgaste en bordes, emisivos e iluminación de estudio.", proyecto: "Render de portfolio", listo: true },
   { n: 9, slug: "m9-androide", titulo: "Androide", desc: "Proyecto final: el cuerpo completo, pieza a pieza.", proyecto: "Tu androide", listo: true },
+  { n: 10, slug: "m10-geometry-nodes", titulo: "Geometry Nodes", desc: "Greebles, remaches y tuberías repartidos con nodos: reglas en vez de clics.", proyecto: "Máquina de greebles", listo: true, extra: true },
+  { n: 11, slug: "m11-decals", titulo: "Decals", desc: "Números de serie, avisos y franjas con una hoja de decals y Shrinkwrap.", proyecto: "Identidad para tu mecha", listo: true, extra: true },
+  { n: 12, slug: "m12-ciclo-caminar", titulo: "Ciclo de caminar", desc: "Rig rígido, IK en las piernas y un paso de 24 fotogramas en bucle.", proyecto: "Androide que camina", listo: true, extra: true },
+  { n: 13, slug: "m13-dron-mecha", titulo: "Dron mecha", desc: "Proyecto completo con conductos, aspas y mono-ojo, usando Forja Tools.", proyecto: "Dron de combate", listo: true, extra: true },
 ];
 
 // --- almacenamiento seguro (modo privado o almacenamiento bloqueado => sin progreso, pero la web funciona)
@@ -61,9 +65,12 @@ function initChecklists() {
 
 // --- portada: tarjetas de la ruta
 function initRoadmap() {
-  const el = document.querySelector("[data-roadmap]");
+  for (const el of document.querySelectorAll("[data-roadmap]")) pintarRuta(el, MODULOS.filter(m => !!m.extra === (el.dataset.roadmap === "extra")));
+}
+
+function pintarRuta(el, lista) {
   if (!el) return;
-  el.innerHTML = MODULOS.map(m => {
+  el.innerHTML = lista.map(m => {
     const p = progresoModulo(m.slug);
     const pct = p.total ? Math.round((p.hechos / p.total) * 100) : 0;
     const done = p.total && p.hechos === p.total;

@@ -304,6 +304,17 @@ forja-visor { display: block; margin: 22px 0; }
 .lightbox.on { display: grid; }
 .lightbox img { max-height: 92vh; width: auto; }
 
+/* diagramas de nodos (módulos 8 y 10) */
+.nodos { width: 100%; height: auto; display: block; margin: 18px 0; }
+.nodos .n rect { fill: var(--panel-2); stroke: var(--line-2); }
+.nodos .n text { fill: var(--text); font: 600 13px var(--font-head); }
+.nodos .n .s { fill: var(--muted); font: 400 11px var(--font-body); }
+.nodos .n.tex rect { stroke: #e0a040; } .nodos .n.mat rect { stroke: #6cbcff; }
+.nodos .n.geo rect { stroke: #3fd6a0; } .nodos .n.out rect { stroke: var(--green); }
+.nodos path { fill: none; stroke: #8d96a5; stroke-width: 2; }
+.nodos path.m { stroke: var(--cyan); }
+.nodos path.g { stroke: #3fd6a0; stroke-width: 3; }
+
 /* galería de la portada */
 .galeria a { display: block; color: var(--text); }
 .galeria img.shot { aspect-ratio: 16 / 10; object-fit: cover; cursor: pointer; transition: filter .2s; }

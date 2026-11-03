@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>11 · Decals · Forja Mecha</title>
+  <meta name="description" content="Decals gratis en Blender: números de serie, avisos y franjas de peligro sobre tu mecha con planos, una hoja de decals con transparencia y Shrinkwrap.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+</head>
+<body data-modulo="m11-decals">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../addon.html">Addon</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo extra 11</div>
+      <h1>Decals</h1>
+      <p style="color:var(--muted);max-width:680px">Números de serie, «NO STEP», franjas de peligro, flechas… Los <strong>decals</strong> son lo que hace que un mecha parezca fabricado, mantenido y con historia, y no un juguete. DECALmachine es de pago; aquí lo harás gratis con planos, una imagen con transparencia y un modificador.</p>
+      <div class="meta"><span>~1,5 horas</span><span>Nivel: medio</span><span>Herramientas: Image Texture · Alpha · UV · Shrinkwrap</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#hoja">La hoja de decals</a>
+      <a href="#p1">1 · El material</a>
+      <a href="#p2">2 · Un plano por decal</a>
+      <a href="#p3">3 · Elegir el decal (UV)</a>
+      <a href="#p4">4 · Pegarlo (Shrinkwrap)</a>
+      <a href="#p5">5 · Tu propia hoja</a>
+      <a href="#diseno">Dónde poner decals</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <div class="compare">
+          <img src="../assets/img/l11_antes.webp" alt="Androide sin decals">
+          <div class="after"><img src="../assets/img/l11_despues.webp" alt="Androide con decals"></div>
+          <div class="handle"></div>
+          <span class="lab l">SIN DECALS</span><span class="lab r">CON DECALS</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Comparar sin y con decals">
+        </div>
+        <p>El mismo androide del módulo 9. Nueve decals pequeños (número de serie, logo, número de unidad, franjas de peligro, flechas, aviso y código de barras) y de repente tiene escala, función e identidad.</p>
+      </section>
+
+      <section id="hoja">
+        <h2>La hoja de decals <span class="tag">// gratis</span></h2>
+        <figure><img src="../assets/img/l11_atlas.webp" alt="Hoja de 12 decals: números, avisos, franjas, flechas, diana, galones, código de barras" loading="lazy"><figcaption>12 decals en una sola imagen PNG con fondo transparente. La hemos generado con Blender y es tuya: úsala para lo que quieras.</figcaption></figure>
+        <div class="dl">
+          <span class="ico">🏷️</span>
+          <div><strong>forja_decals.png</strong><small>2048 × 1536 px, con transparencia. Cuadrícula de 4 × 3 celdas de 512 px.</small></div>
+          <a class="btn small ghost" href="../assets/descargas/forja_decals.png" download>Descargar</a>
+        </div>
+        <div class="note why"><p><strong>¿Por qué una hoja y no imágenes sueltas?</strong> Un solo material sirve para todos los decals: solo cambias qué trozo de la imagen muestra cada plano. Es como trabajan los videojuegos (se llama <em>atlas</em>).</p></div>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>El material de decal</h3></div>
+          <ol>
+            <li>Nuevo material <code>Decal</code>. En el Shader Editor: <kbd>Shift</kbd>+<kbd>A</kbd> → Texture → <strong>Image Texture</strong> → Open → <code>forja_decals.png</code>.</li>
+            <li><strong>Color</strong> → Base Color del Principled. <strong>Alpha</strong> → <strong>Alpha</strong> del Principled. Las zonas transparentes de la imagen desaparecen.</li>
+            <li>En el nodo de imagen, <em>Extension: Clip</em>, para que no se repita en los bordes.</li>
+            <li>Roughness ~0.45: así el decal brilla un poco distinto que el blindaje, como una pegatina o pintura real.</li>
+          </ol>
+          <div class="note tip"><p><strong>EEVEE:</strong> si ves el fondo del decal en negro, en las propiedades del material (<em>Settings</em>) comprueba que <em>Render Method</em> sea <strong>Dithered</strong>, el valor por defecto en Blender 4.2.</p></div>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Un plano por decal</h3></div>
+          <figure><img src="../assets/img/l11_planos.webp" alt="Androide con los planos de los decals marcados en azul" loading="lazy"><figcaption>En azul, los planos de cada decal. Son finísimos y van pegados a la superficie.</figcaption></figure>
+          <ol>
+            <li><kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → <strong>Plane</strong>, pequeño. En modo edición, clic derecho → <strong>Subdivide</strong> (5 cortes) para que pueda adaptarse a superficies curvas.</li>
+            <li>Colócalo delante de la superficie, mirando hacia fuera. Truco: pon el cursor sobre la pieza (<kbd>Shift</kbd>+clic derecho con <em>Orientation: Geometry</em>) y añade el plano con <em>Align: 3D Cursor</em>.</li>
+            <li>Asígnale el material <code>Decal</code>.</li>
+            <li>En <em>Object Properties → Visibility</em>, desactiva <strong>Shadow</strong>: un decal no debe proyectar sombra.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Elegir el decal con las UV</h3></div>
+          <ol>
+            <li>Workspace <strong>UV Editing</strong>. A la izquierda, abre la imagen <code>forja_decals.png</code>.</li>
+            <li>Con el plano en modo edición y todo seleccionado (<kbd>A</kbd>), verás su cuadrado UV. Escálalo (<kbd>S</kbd>) y muévelo (<kbd>G</kbd>) hasta que encierre la celda que quieres: por ejemplo, «FM-09».</li>
+            <li>Si el decal no es cuadrado (como «PELIGRO»), escala el plano en 3D en la misma proporción para que no se deforme.</li>
+          </ol>
+          <div class="note tip"><p><strong>Precisión:</strong> cada celda mide exactamente 0.25 × 0.333 de la imagen. En el panel <kbd>N</kbd> del editor UV puedes escribir las coordenadas a mano.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Pegarlo a la superficie: Shrinkwrap</h3></div>
+          <ol>
+            <li>Modificador <strong>Shrinkwrap</strong> en el plano, con Target = la pieza (el pecho, la hombrera…).</li>
+            <li>Wrap Method <strong>Nearest Surface Point</strong> y <strong>Offset 0.0015</strong>: el plano se adapta a la forma y queda una micra por encima, para no parpadear.</li>
+            <li>Emparenta el decal con su pieza (<kbd>Ctrl</kbd>+<kbd>P</kbd>) para que la acompañe al posar o animar.</li>
+          </ol>
+          <div class="note warn"><p><strong>Cuidado con los bordes:</strong> si el plano llega al borde de la pieza, Shrinkwrap lo dobla hacia la cara lateral y el decal se corta (pasó con el «03» de la hombrera). Deja margen o hazlo más pequeño.</p></div>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>decals.blend</strong><small>El androide con los 9 decals ya colocados, el material y la hoja enlazada.</small></div>
+            <a class="btn small ghost" href="../assets/blend/decals.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Tu propia hoja de decals</h3></div>
+          <p>Puedes hacer la tuya en cualquier programa de dibujo gratuito (Krita, GIMP, Inkscape) o en el propio Blender, como la nuestra:</p>
+          <ol>
+            <li>Escena nueva, cámara <strong>ortográfica</strong> mirando hacia abajo.</li>
+            <li>Textos (<kbd>Shift</kbd>+<kbd>A</kbd> → Text; <kbd>Tab</kbd> para escribir), planos y formas con colores planos.</li>
+            <li>Render en <strong>Workbench</strong> con Lighting <em>Flat</em> y Color <em>Object</em>; en <em>Film</em>, <strong>Transparent</strong> ✓; Color Management en <em>Standard</em>.</li>
+            <li>Formato de salida <strong>PNG</strong> en modo <strong>RGBA</strong>, para conservar la transparencia.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="diseno">
+        <h2>Dónde poner decals <span class="tag">// diseño</span></h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Regla</th><th>Por qué</th></tr>
+            <tr><td><strong>Pocos y pequeños</strong></td><td>Dan escala por contraste: un texto diminuto hace que la pieza parezca enorme. Si hay demasiados, vuelve el ruido del módulo 5.</td></tr>
+            <tr><td><strong>En zonas de descanso</strong></td><td>Las superficies lisas son su sitio natural. Nunca encima del detalle mecánico.</td></tr>
+            <tr><td><strong>Con lógica</strong></td><td>«NO STEP» donde alguien podría pisar, franjas de peligro en bordes móviles, flechas indicando un sentido o una apertura.</td></tr>
+            <tr><td><strong>Simetría rota</strong></td><td>Un número solo en un hombro y las franjas en el otro: la asimetría pequeña da interés.</td></tr>
+            <tr><td><strong>Contraste justo</strong></td><td>Grafito sobre blanco y blanco sobre oscuro. Los colores fuertes (amarillo, rojo), solo para avisos.</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: identidad para tu mecha <span class="tag">// checklist</span></h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="material"><span>Material de decal con Alpha funcionando</span></label></li>
+          <li><label><input type="checkbox" data-id="uv"><span>He elegido celdas de la hoja moviendo las UV</span></label></li>
+          <li><label><input type="checkbox" data-id="shrink"><span>Decals pegados con Shrinkwrap, sin parpadeos</span></label></li>
+          <li><label><input type="checkbox" data-id="logica"><span>Cada decal tiene una razón de estar donde está</span></label></li>
+          <li><label><input type="checkbox" data-id="numero"><span>Mi mecha tiene número de serie o de unidad</span></label></li>
+          <li><label><input type="checkbox" data-id="hoja"><span>Extra: hoja de decals propia con transparencia</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+</body>
+</html>

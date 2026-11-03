@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>13 · Dron mecha · Forja Mecha</title>
+  <meta name="description" content="Proyecto completo en Blender: un dron de combate mecha con conductos, aspas, mono-ojo y cañones, usando toda la ruta y el addon Forja Tools.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m13-dron-mecha">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../addon.html">Addon</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo extra 13 · Proyecto</div>
+      <h1>Dron mecha</h1>
+      <p style="color:var(--muted);max-width:680px">Un proyecto nuevo de principio a fin: un dron de combate con cuatro rotores carenados, mono-ojo y cañones. Cada paso indica la técnica de la ruta y el botón de <a href="../addon.html">Forja Tools</a> que la hace por ti, para que compruebes cuánto más rápido vas ya.</p>
+      <div class="meta"><span>~4–6 horas</span><span>Nivel: todo lo anterior</span><span>Nuevo: Screw (torno) · Spin</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#visor">El dron en 3D</a>
+      <a href="#p1">1 · Diseño y blockout</a>
+      <a href="#p2">2 · Cuerpo</a>
+      <a href="#p3">3 · Conductos con torno</a>
+      <a href="#p4">4 · Aspas en círculo</a>
+      <a href="#p5">5 · Ojo y cañones</a>
+      <a href="#p6">6 · Detalle</a>
+      <a href="#p7">7 · En vuelo</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l13_eevee.webp" alt="Dron mecha blanco con cuatro rotores carenados, mono-ojo rojo y cañones" loading="lazy">
+          <figcaption>El dron en vuelo: el morro ligeramente inclinado hacia abajo, el ojo rojo encendido y luces de navegación en los rotores.</figcaption>
+        </figure>
+      </section>
+
+      <section id="visor">
+        <h2>Gíralo por fases <span class="tag">// 3D</span></h2>
+        <forja-visor data-malla="off" data-vista="0.55,0.7,1" data-distancia="1.15"
+          data-modelos="dron_01,dron_02,dron_03,dron_04"
+          data-etiquetas="1 Blockout|2 Formas|3 Detalle|4 Final"
+          data-notas="Blockout: cajas y cilindros. ¿Se lee como dron? Sí: cuatro rotores y un cuerpo.|Formas: cuerpo achaflanado, brazos que se estrechan, conductos huecos, torreta, cañones y patines.|Detalle: aspas, ojo, luces, línea de panel, rejilla, tornillos y antena.|Acabado: Bevel en todo. Gíralo y mira los conductos desde abajo."></forja-visor>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Diseño y blockout</h3></div>
+          <figure><img src="../assets/img/l13_01_blockout.webp" alt="Blockout del dron con cajas y cilindros" loading="lazy"></figure>
+          <p>Antes de modelar, responde: <strong>¿qué hace?</strong> Vigila y dispara. Entonces necesita un ojo grande y visible, armas y rotores protegidos (carenados) para entrar en sitios estrechos. El diseño sale de la función (módulo 6).</p>
+          <ol>
+            <li>Una caja para el cuerpo (1 × 0.7 × 0.26), 4 cilindros para los rotores, una esfera para la torreta y cajas para cañones y patines.</li>
+            <li>Haz <strong>un rotor y un brazo</strong>, y luego <strong>Forja Tools → Espejo X</strong> y <strong>Espejo Y</strong>: tienes los cuatro. Si cambias uno, cambian todos.</li>
+            <li>Comprueba la silueta desde arriba, de frente y de lado.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>El cuerpo</h3></div>
+          <figure><img src="../assets/img/l13_02_formas.webp" alt="Dron con las formas definitivas" loading="lazy"></figure>
+          <ol>
+            <li>Cuerpo: chaflán de 0.16 en las aristas verticales (<kbd>Ctrl</kbd>+<kbd>B</kbd>), como la placa del módulo 3.</li>
+            <li>Tapa: selecciona la cara de arriba y <strong>Forja Tools → Sacar</strong> (margen 0.07, altura 0.05): sale la meseta.</li>
+            <li>Vientre oscuro: una pieza aparte, más pequeña, debajo. Es la estructura que asoma bajo el blindaje (módulo 9).</li>
+            <li>Brazos: un perfil que se estrecha hacia el rotor (perfil + Solidify, módulo 6). Estrecharse hacia fuera hace que parezca más ligero.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Conductos con torno (Screw)</h3></div>
+          <p>Las piezas redondas con perfil (conductos, bujes, cañones, el marco del ojo) se hacen dibujando <strong>medio perfil</strong> y girándolo, como en un torno de verdad:</p>
+          <ol>
+            <li>Vista frontal (<kbd>Num 1</kbd>). Añade un plano, entra en modo edición, bórralo todo y dibuja con <kbd>Ctrl</kbd>+clic derecho el <strong>perfil de la pared</strong> del conducto: un rectángulo estrecho con un bisel en el labio superior, situado a 0.25–0.3 del eje.</li>
+            <li>Modificador <strong>Screw</strong>: Angle 360°, Steps 40, <em>Merge</em> ✓. El perfil gira y se convierte en un anillo.</li>
+            <li>Alternativa en modo edición: herramienta <strong>Spin</strong> de la barra izquierda (o <kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → Circle + Extrude), si quieres aplicar el resultado.</li>
+          </ol>
+          <div class="note why"><p><strong>¿Por qué un torno?</strong> Para cambiar la forma del conducto, editas 5 vértices del perfil y no 200 de la malla. Es el mismo principio no destructivo de los cortadores.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Aspas en círculo</h3></div>
+          <ol>
+            <li>Una sola aspa: una caja fina girada unos 22° sobre su eje largo, para que tenga ángulo de ataque, como una hélice real.</li>
+            <li>Coloca el cursor 3D en el centro del rotor y pulsa <strong>Forja Tools → En círculo</strong> con 6 copias. Sin el addon: Array con <em>Object Offset</em> apuntando a un Empty girado 60°.</li>
+            <li>Buje en el centro (otro torno) y tres soportes del motor hasta el conducto.</li>
+          </ol>
+          <div class="note tip"><p><strong>Truco de render:</strong> si animas el dron, las aspas giran tan rápido que se verían borrosas. Un disco semitransparente con desenfoque de movimiento queda mejor que las aspas reales.</p></div>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Mono-ojo y cañones</h3></div>
+          <ol>
+            <li><strong>Torreta:</strong> UV Sphere oscura bajo el morro. Un marco con torno (anillo con labio) y, delante, un disco con material <strong>emisivo rojo</strong> (Strength ~14).</li>
+            <li><strong>Cañones:</strong> perfil de torno (base gruesa, cañón fino y boca con anillo) girado 90° para apuntar adelante. Hazlo una vez y <strong>Espejo X</strong>.</li>
+            <li><strong>Patines:</strong> dos patas y una barra por lado. Simples, oscuros y robustos.</li>
+          </ol>
+          <div class="note warn"><p><strong>Lección aprendida al hacer este dron:</strong> el primer ojo quedó <em>dentro</em> de la esfera de la torreta y no se veía. Cuando una pieza «desaparece», pulsa <kbd>Alt</kbd>+<kbd>Z</kbd> (rayos X) y mírala de lado: casi siempre está tapada por otra.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Detalle con Forja Tools</h3></div>
+          <figure><img src="../assets/img/l13_03_detalle.webp" alt="Dron con aspas, luces, rejilla, línea de panel y tornillos" loading="lazy"></figure>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Detalle</th><th>Con Forja Tools</th><th>Técnica (módulo)</th></tr>
+              <tr><td>Línea de panel en la meseta</td><td>Modo edición, caras → <strong>Línea de panel</strong></td><td>Cortador con Solidify (3)</td></tr>
+              <tr><td>Rejilla trasera</td><td><strong>Ranura</strong> + <strong>En fila</strong> ×9</td><td>Cortador + Array (3)</td></tr>
+              <tr><td>Luces de los flancos</td><td><strong>Piezas → LED</strong> + En fila</td><td>Emisivo + Array (1, 3)</td></tr>
+              <tr><td>Luces de navegación</td><td>Material <strong>Luz roja / azul</strong></td><td>Emisivo (8)</td></tr>
+              <tr><td>Tornillos de la tapa</td><td><strong>Piezas → Tornillo</strong> en el cursor</td><td>Floaters (3)</td></tr>
+              <tr><td>Bisel en todo</td><td>Selecciona todo → <strong>Afilar</strong></td><td>Receta (2)</td></tr>
+              <tr><td>«UNIT-01» y franjas</td><td>—</td><td>Decals con Shrinkwrap (11)</td></tr>
+            </table>
+          </div>
+          <figure><img src="../assets/img/l13_04_final.webp" alt="Dron terminado en Workbench" loading="lazy"></figure>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>dron_mecha.blend</strong><small>El dron completo con cortadores no destructivos, materiales y decals.</small></div>
+            <a class="btn small ghost" href="../assets/blend/dron_mecha.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="p7">
+        <div class="step">
+          <div class="step-head"><span class="n">7</span><h3>En vuelo</h3></div>
+          <ol>
+            <li>Emparenta todo con un Empty «Vuelo» (los cortadores también, ¡módulo 3!).</li>
+            <li>Gira el Empty −8° en X: un dron avanzando lleva el morro bajo. Un poco de giro en Z para la composición.</li>
+            <li><strong>Forja Tools → Estudio de render</strong> y cámara ligeramente por encima: se ven los rotores por dentro.</li>
+            <li>Extra: anima el Empty subiendo y bajando unos centímetros en bucle (módulo 12): flotará.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu flota <span class="tag">// checklist</span></h2>
+        <p>Diseña tu propio dron o vehículo: un dron de carga con contenedor, uno explorador con antenas y sensores, o un vehículo de 6 ruedas.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="funcion"><span>El diseño sale de una función clara</span></label></li>
+          <li><label><input type="checkbox" data-id="espejo"><span>Simetría con Espejo X/Y (un rotor, cuatro copias)</span></label></li>
+          <li><label><input type="checkbox" data-id="torno"><span>Al menos 2 piezas hechas con Screw (torno)</span></label></li>
+          <li><label><input type="checkbox" data-id="radial"><span>Un array radial (aspas, tornillos de brida…)</span></label></li>
+          <li><label><input type="checkbox" data-id="addon"><span>He usado Forja Tools para el detalle</span></label></li>
+          <li><label><input type="checkbox" data-id="decals"><span>Decals con número de unidad</span></label></li>
+          <li><label><input type="checkbox" data-id="render"><span>Render en vuelo con el morro inclinado</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

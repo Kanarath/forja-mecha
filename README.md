@@ -47,3 +47,22 @@ Cualquier servidor estático vale, por ejemplo:
 ```bash
 npx http-server -p 5173
 ```
+
+### Módulos extra
+
+| # | Módulo | Estado |
+|---|---|---|
+| 10 | Geometry Nodes | ✅ |
+| 11 | Decals | ✅ |
+| 12 | Ciclo de caminar | ✅ |
+| 13 | Dron mecha | ✅ |
+
+## Forja Tools (addon)
+
+Addon gratuito en [`addon/forja_tools`](addon/forja_tools) (descarga empaquetada en `assets/descargas/`). Se prueba con:
+
+```bash
+blender -b --factory-startup --python tools/test_addon.py
+```
+
+Los módulos extra se generan con `tools/forja_extra.py -- m10|m11|m12|m13`.

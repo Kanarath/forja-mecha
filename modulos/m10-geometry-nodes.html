@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>10 · Geometry Nodes · Forja Mecha</title>
+  <meta name="description" content="Geometry Nodes para hard surface en Blender: reparte greebles, remaches y tuberías de forma procedural y no destructiva.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body data-modulo="m10-geometry-nodes">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../addon.html">Addon</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo extra 10</div>
+      <h1>Geometry Nodes</h1>
+      <p style="color:var(--muted);max-width:680px">Colocar 40 greebles a mano es lento. Colocar 44 remaches a la misma distancia, peor. Con <strong>Geometry Nodes</strong> describes la regla una vez («reparte estas piezas sobre las caras que miran hacia arriba») y Blender la aplica. Cambias un número y el resultado se rehace.</p>
+      <div class="meta"><span>~2,5 horas</span><span>Nivel: medio-avanzado</span><span>Herramientas: Geometry Nodes · Distribute · Instance on Points · Curve to Mesh</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#concepto">Cómo piensa Geometry Nodes</a>
+      <a href="#p1">1 · Tu kit en una colección</a>
+      <a href="#p2">2 · Greebles repartidos</a>
+      <a href="#p3">3 · Solo hacia arriba</a>
+      <a href="#p4">4 · Variedad</a>
+      <a href="#p5">5 · Remaches en una curva</a>
+      <a href="#p6">6 · Tuberías</a>
+      <a href="#limites">Cuándo usarlo (y cuándo no)</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <figure>
+          <img src="../assets/img/l10_eevee.webp" alt="Placa cubierta de greebles repartidos por Geometry Nodes" loading="lazy">
+          <figcaption>La placa del módulo 3 con greebles del kit del módulo 5, repartidos por un árbol de nodos. Nadie ha colocado ninguna pieza a mano.</figcaption>
+        </figure>
+        <p>Construirás tres «máquinas» reutilizables: un <strong>repartidor de greebles</strong>, una <strong>remachadora</strong> que sigue una curva y un <strong>generador de tuberías</strong> con abrazaderas.</p>
+      </section>
+
+      <section id="concepto">
+        <h2>Cómo piensa Geometry Nodes <span class="tag">// concepto</span></h2>
+        <p>Es un modificador como Bevel o Array, pero lo programas tú con nodos. La geometría entra por la izquierda (<em>Group Input</em>), pasa por los nodos y sale por la derecha (<em>Group Output</em>). Tres ideas clave:</p>
+        <div class="grid c3">
+          <div class="card"><h3>Puntos</h3><p>Primero se generan puntos (sobre caras o a lo largo de curvas). Son posiciones, no se ven en el render.</p></div>
+          <div class="card"><h3>Instancias</h3><p>En cada punto se pone una copia ligera de una pieza. Miles de copias apenas gastan memoria.</p></div>
+          <div class="card"><h3>Campos</h3><p>Valores que cambian en cada punto: la normal, un número aleatorio… Por eso cada pieza puede ser distinta.</p></div>
+        </div>
+        <div class="note tip"><p><strong>Dónde se hace:</strong> workspace <strong>Geometry Nodes</strong> (pestaña de arriba) → selecciona tu objeto → <strong>New</strong>. Los nodos se añaden con <kbd>Shift</kbd>+<kbd>A</kbd> o escribiendo su nombre tras pulsar <kbd>Shift</kbd>+<kbd>A</kbd> y empezar a teclear.</p></div>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>Tu kit en una colección</h3></div>
+          <ol>
+            <li>Crea una colección <code>Kit Greebles</code> con 4–6 piezas pequeñas: conector, disipador, caja y tornillo (módulo 5, o los botones de <a href="../addon.html">Forja Tools</a>).</li>
+            <li>Cada pieza, <strong>en el origen</strong> (0, 0, 0) y <strong>apoyada en Z = 0</strong>: así se asentará sobre la superficie.</li>
+            <li>Si una pieza tiene varias partes, únelas con <kbd>Ctrl</kbd>+<kbd>J</kbd>.</li>
+            <li>Desmarca la casilla de la colección en el Outliner (excluir): no se ve en la escena, pero los nodos sí la pueden usar.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>El repartidor de greebles</h3></div>
+          <svg class="nodos" viewBox="0 0 900 250" role="img" aria-label="Árbol de nodos del repartidor de greebles">
+            <g class="n geo"><rect x="10" y="40" width="130" height="50" rx="6"/><text x="22" y="62">Group Input</text><text class="s" x="22" y="79">la placa</text></g>
+            <g class="n geo"><rect x="180" y="40" width="170" height="64" rx="6"/><text x="192" y="62">Distribute Points</text><text class="s" x="192" y="79">on Faces · Poisson Disk</text><text class="s" x="192" y="95">Distance Min · Density</text></g>
+            <g class="n tex"><rect x="180" y="150" width="170" height="50" rx="6"/><text x="192" y="172">Collection Info</text><text class="s" x="192" y="189">Kit · Separate Children ✓</text></g>
+            <g class="n"><rect x="395" y="150" width="140" height="64" rx="6"/><text x="407" y="172">Random Value</text><text class="s" x="407" y="189">Integer → índice</text><text class="s" x="407" y="205">Float → escala</text></g>
+            <g class="n geo"><rect x="570" y="40" width="160" height="80" rx="6"/><text x="582" y="62">Instance on Points</text><text class="s" x="582" y="79">Pick Instance ✓</text><text class="s" x="582" y="95">Rotation ← Distribute</text><text class="s" x="582" y="111">Scale ← Random</text></g>
+            <g class="n out"><rect x="760" y="40" width="130" height="64" rx="6"/><text x="772" y="62">Join Geometry</text><text class="s" x="772" y="79">placa + piezas</text><text class="s" x="772" y="95">→ Group Output</text></g>
+            <path class="g" d="M140 65 L180 65"/><path class="g" d="M350 65 L570 65"/><path class="g" d="M350 175 C450 175 470 100 570 100"/>
+            <path d="M535 182 C555 182 550 110 570 110"/><path class="g" d="M730 72 L760 72"/>
+            <path class="g" d="M140 75 C160 75 160 230 700 230 C740 230 740 92 760 92"/>
+          </svg>
+          <ol>
+            <li><strong>Distribute Points on Faces</strong> en modo <strong>Poisson Disk</strong>: reparte puntos sin que se amontonen (<em>Distance Min</em>).</li>
+            <li><strong>Collection Info</strong> con tu kit y <em>Separate Children</em> y <em>Reset Children</em> activados.</li>
+            <li><strong>Instance on Points</strong>: Points ← los puntos, Instance ← la colección, <strong>Pick Instance</strong> ✓ (elige una pieza distinta en cada punto), <strong>Rotation</strong> ← la salida Rotation de Distribute (cada pieza se alinea con la superficie).</li>
+            <li><strong>Random Value</strong> (Integer, de 0 a nº de piezas − 1) → <em>Instance Index</em>. Otro Random Value (Float, 0.7–1.3) → <em>Scale</em>.</li>
+            <li><strong>Join Geometry</strong> con la placa original, para que no desaparezca, → Group Output.</li>
+          </ol>
+          <div class="note tip"><p><strong>Expón los controles:</strong> arrastra <em>Density</em> o <em>Seed</em> hasta el borde izquierdo libre del Group Input. Aparecen como deslizadores en el panel del modificador y no tendrás que abrir los nodos para ajustarlos.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>Solo en las caras que miran hacia arriba</h3></div>
+          <p>Sin control, saldrían piezas en los laterales y por debajo. La solución es un <strong>campo</strong>:</p>
+          <ol>
+            <li><strong>Normal</strong> → <strong>Separate XYZ</strong> → <strong>Compare</strong> (Z <em>Greater Than</em> 0.9) → entrada <strong>Selection</strong> de Distribute.</li>
+            <li>Así solo cuentan las caras cuya normal apunta casi recta hacia arriba. Con 0.5 aceptarías también caras inclinadas.</li>
+          </ol>
+          <div class="note why"><p><strong>Esto es un campo:</strong> la comparación se evalúa <em>en cada cara</em> por separado. Es la idea más potente de Geometry Nodes, la misma con la que podrías poner remaches solo en los bordes o luces solo en las caras que miran a cámara.</p></div>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Variedad con la semilla</h3></div>
+          <figure data-tabs>
+            <div class="tabs">
+              <button class="on" data-src="../assets/img/l10_semilla_a.webp" data-cap="Semilla 0, densidad 30.">Semilla 0</button>
+              <button data-src="../assets/img/l10_semilla_b.webp" data-cap="Semilla 7: misma regla, otra distribución.">Semilla 7</button>
+              <button data-src="../assets/img/l10_semilla_c.webp" data-cap="Semilla 42: otra más. Elige la que mejor componga.">Semilla 42</button>
+              <button data-src="../assets/img/l10_densidad.webp" data-cap="Densidad 90 y distancia 0.1: saturado. Recuerda el 70/30 del módulo 5.">Densidad alta</button>
+            </div>
+            <img src="../assets/img/l10_semilla_a.webp" alt="Variantes de reparto de greebles" loading="lazy">
+            <figcaption>Semilla 0, densidad 30.</figcaption>
+          </figure>
+          <p>La <strong>semilla</strong> (Seed) cambia el reparto aleatorio sin cambiar la regla. Prueba varias y quédate con la que deje mejores zonas de descanso. Los nodos no tienen criterio estético: lo pones tú.</p>
+          <forja-visor data-malla="off" data-vista="0.55,1.15,1" data-distancia="1.5"
+            data-modelos="gn_greebles,gn_remaches" data-etiquetas="Greebles|Remaches + tubería"
+            data-notas="El resultado del repartidor (convertido a malla para la web).|44 remaches equidistantes alrededor del marco y una tubería con 7 abrazaderas."></forja-visor>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Remaches a lo largo de una curva</h3></div>
+          <figure><img src="../assets/img/l10_remaches_tuberia.webp" alt="Placa con remaches alrededor del marco y una tubería con abrazaderas" loading="lazy"></figure>
+          <ol>
+            <li>Dibuja una curva que siga el marco: <kbd>Shift</kbd>+<kbd>A</kbd> → Curve, o duplica las aristas del borde (<kbd>Shift</kbd>+<kbd>D</kbd>, <kbd>P</kbd>) y conviértelas con <code>Object → Convert → Curve</code>.</li>
+            <li>Geometry Nodes en la curva: <strong>Resample Curve</strong> (Count 44) → <strong>Instance on Points</strong> con un <strong>Object Info</strong> del remache → <strong>Realize Instances</strong>.</li>
+            <li>Cambia <em>Count</em> y los remaches se reparten solos, siempre equidistantes. Mueve un punto de la curva y todos lo siguen.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Tuberías con abrazaderas</h3></div>
+          <ol>
+            <li>Una curva Bézier por donde quieras la tubería.</li>
+            <li><strong>Curve to Mesh</strong> con un <strong>Curve Circle</strong> como perfil (Radius = grosor) → <strong>Set Shade Smooth</strong>.</li>
+            <li>En paralelo: <strong>Resample Curve</strong> (7) → <strong>Instance on Points</strong> con la abrazadera. Para que se orienten con el tubo: <strong>Curve Tangent</strong> → <strong>Align Euler to Vector</strong> (eje X) → Rotation.</li>
+            <li><strong>Join Geometry</strong> de tubo y abrazaderas.</li>
+          </ol>
+          <div class="note why"><p><strong>¿Por qué no un cable del módulo 5?</strong> Aquí el grosor, el número de abrazaderas y su pieza son <em>parámetros</em>. Con el árbol hecho, cada tubería nueva es dibujar una curva y asignarle el mismo grupo de nodos.</p></div>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>geometry_nodes.blend</strong><small>Los tres árboles de nodos (Forja Greebles, Forja Remaches, Forja Tuberia) listos para reutilizar con <code>File → Append → NodeTree</code>.</small></div>
+            <a class="btn small ghost" href="../assets/blend/geometry_nodes.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="limites">
+        <h2>Cuándo usarlo (y cuándo no) <span class="tag">// criterio</span></h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>✔ Geometry Nodes</th><th>✘ Mejor a mano</th></tr>
+            <tr><td>Muchas piezas pequeñas repetidas: remaches, tornillos, greebles de fondo</td><td>Las piezas protagonistas: el núcleo, el visor, el mecanismo del arma</td></tr>
+            <tr><td>Cosas que siguen una regla: «cada 5 cm», «solo arriba»</td><td>Composición con intención: dónde va el punto focal</td></tr>
+            <tr><td>Variantes rápidas para probar ideas</td><td>Una pieza única que vas a ver de cerca</td></tr>
+          </table>
+        </div>
+        <div class="note warn"><p><strong>Rendimiento:</strong> mientras trabajas, deja las instancias sin realizar (sin <em>Realize Instances</em>): ocupan muchísimo menos. Realízalas solo si las vas a editar a mano o exportar.</p></div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: tu máquina de greebles <span class="tag">// checklist</span></h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="kit"><span>Colección de kit excluida, con piezas en el origen</span></label></li>
+          <li><label><input type="checkbox" data-id="reparto"><span>Repartidor con Poisson Disk + Pick Instance + Rotation</span></label></li>
+          <li><label><input type="checkbox" data-id="campo"><span>Selección con un campo (Normal → Compare)</span></label></li>
+          <li><label><input type="checkbox" data-id="expuestos"><span>Densidad y Semilla expuestas en el modificador</span></label></li>
+          <li><label><input type="checkbox" data-id="remaches"><span>Remaches equidistantes siguiendo una curva</span></label></li>
+          <li><label><input type="checkbox" data-id="tuberia"><span>Tubería con abrazaderas orientadas</span></label></li>
+          <li><label><input type="checkbox" data-id="androide"><span>Lo he aplicado a una pieza de mi androide</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script type="module" src="../assets/js/visor.js"></script>
+</body>
+</html>

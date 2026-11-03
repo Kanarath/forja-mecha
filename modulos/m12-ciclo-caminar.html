@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>12 · Ciclo de caminar · Forja Mecha</title>
+  <meta name="description" content="Rig y animación de un androide hard surface en Blender: huesos, emparentado rígido, IK en las piernas y un ciclo de caminar de 24 fotogramas en bucle.">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/forja.css">
+  <style>
+    .anim-wrap { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; margin: 22px 0; }
+    .anim {
+      width: min(300px, 70vw); aspect-ratio: 300 / 420; flex: none;
+      background: #77797e url("../assets/img/l12_tira.webp") 0 0 / 800% 100% no-repeat;
+      animation: caminar var(--dur, 1s) steps(8) infinite;
+      clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    }
+    .anim.pausa { animation-play-state: paused; }
+    @keyframes caminar { to { background-position-x: 114.2857%; } }
+    @media (prefers-reduced-motion: reduce) { .anim { animation-play-state: paused; } }
+    .poses { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .poses figure { margin: 0; }
+    @media (max-width: 560px) { .poses { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body data-modulo="m12-ciclo-caminar">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="../index.html"><img class="logo-mark" src="../assets/img/favicon.svg" alt=""><span class="txt">FORJA<span class="slash">//</span>MECHA</span></a>
+      <nav>
+        <a href="../index.html#ruta">Ruta</a>
+        <a href="../addon.html">Addon</a>
+        <a href="../atajos.html">Atajos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="lesson-hero">
+    <div class="wrap">
+      <div class="eyebrow">Módulo extra 12</div>
+      <h1>Ciclo de caminar</h1>
+      <p style="color:var(--muted);max-width:680px">Tu androide del módulo 9 echa a andar. Le pondrás un esqueleto, controles de pie con <strong>IK</strong> y un ciclo de 24 fotogramas que se repite sin fin. La buena noticia del hard surface: un robot no se deforma, así que el rig es mucho más sencillo que el de un personaje orgánico.</p>
+      <div class="meta"><span>~3 horas</span><span>Nivel: medio-avanzado</span><span>Herramientas: Armature · Bone parent · IK · Keyframes · Graph Editor</span></div>
+    </div>
+  </div>
+
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <h4>En este módulo</h4>
+      <a href="#objetivo">Objetivo</a>
+      <a href="#concepto">FK, IK y rig rígido</a>
+      <a href="#p1">1 · El esqueleto</a>
+      <a href="#p2">2 · Emparentar piezas</a>
+      <a href="#p3">3 · IK en las piernas</a>
+      <a href="#p4">4 · Las 4 poses clave</a>
+      <a href="#p5">5 · Animar y hacer bucle</a>
+      <a href="#p6">6 · Brazos, cadera y torso</a>
+      <a href="#p7">7 · Renderizar el vídeo</a>
+      <a href="#reto">Reto</a>
+    </aside>
+
+    <main class="lesson">
+      <section id="objetivo">
+        <h2>Lo que vas a forjar <span class="tag">// objetivo</span></h2>
+        <div class="anim-wrap">
+          <div class="anim" id="anim" role="img" aria-label="Animación del androide caminando, vista lateral"></div>
+          <div>
+            <p>Estos son 8 de los 24 fotogramas del ciclo, renderizados en Blender y reproducidos aquí en bucle.</p>
+            <div class="tabs" id="ctrl">
+              <button class="on" data-v="pausa">⏸ Pausa</button>
+              <button data-v="lento">Lento</button>
+              <button data-v="normal">Normal</button>
+            </div>
+          </div>
+        </div>
+        <figure><img src="../assets/img/l12_eevee.webp" alt="Androide en mitad de un paso" loading="lazy"><figcaption>El fotograma 4 del ciclo (la «bajada»), renderizado en EEVEE.</figcaption></figure>
+      </section>
+
+      <section id="concepto">
+        <h2>FK, IK y rig rígido <span class="tag">// concepto</span></h2>
+        <div class="grid c3">
+          <div class="card"><h3>Rig rígido</h3><p>Cada pieza del robot sigue a un hueso sin deformarse (<em>Bone parent</em>). No hace falta pintar pesos como en un personaje orgánico.</p></div>
+          <div class="card"><h3>FK</h3><p><em>Forward Kinematics</em>: giras cada hueso en cadena (muslo, luego espinilla…). Ideal para brazos que se balancean.</p></div>
+          <div class="card"><h3>IK</h3><p><em>Inverse Kinematics</em>: mueves el pie y la pierna se dobla sola. Imprescindible para que los pies no resbalen al caminar.</p></div>
+        </div>
+      </section>
+
+      <section id="p1">
+        <div class="step">
+          <div class="step-head"><span class="n">1</span><h3>El esqueleto</h3></div>
+          <figure><img src="../assets/img/l12_rig.webp" alt="Androide en rayos X con los huesos dentro y los controles en amarillo" loading="lazy"><figcaption>En azul, los huesos que mueven piezas (cadera, torso, muslos, espinillas, pies). En amarillo, los controles que animas (pies IK, polos y raíz).</figcaption></figure>
+          <ol>
+            <li><kbd>Shift</kbd>+<kbd>A</kbd> → <strong>Armature</strong>. En modo edición, coloca el hueso <code>cadera</code> en la pelvis y extruye (<kbd>E</kbd>) el <code>torso</code> hacia arriba.</li>
+            <li>Pierna izquierda: <code>muslo.L</code> desde la cadera hasta la rodilla, <code>espinilla.L</code> hasta el tobillo y <code>pie.L</code> hacia delante. <strong>Dobla la rodilla un poco hacia delante</strong> (unos centímetros): así el IK sabe hacia dónde doblar.</li>
+            <li>Nombra con <code>.L</code> y luego selecciona esos huesos → <code>Armature → Symmetrize</code>: aparece la pierna <code>.R</code>.</li>
+            <li>Controles (sin padre, o hijos de un hueso <code>raiz</code> en el suelo): <code>pie_ik.L/.R</code> en los tobillos y <code>polo.L/.R</code> delante de las rodillas.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p2">
+        <div class="step">
+          <div class="step-head"><span class="n">2</span><h3>Emparentar las piezas</h3></div>
+          <ol>
+            <li>Selecciona las piezas del muslo, luego el armature, entra en <strong>Pose Mode</strong> (<kbd>Ctrl</kbd>+<kbd>Tab</kbd>), haz clic en el hueso <code>muslo.L</code> y pulsa <kbd>Ctrl</kbd>+<kbd>P</kbd> → <strong>Bone</strong>.</li>
+            <li>Repite con cada grupo: espinilla (con rodillera y luces), pie, cadera (pelvis y faldones) y torso (pecho, abdomen, cabeza y mochila).</li>
+            <li>Los brazos pueden seguir con sus Empties del módulo 9: emparenta esos Empties con el hueso <code>torso</code>.</li>
+          </ol>
+          <div class="note tip"><p><strong>Comprueba antes de seguir:</strong> en Pose Mode, gira el <code>torso</code> con <kbd>R</kbd>. Si alguna pieza se queda atrás, no está emparentada. <kbd>Alt</kbd>+<kbd>R</kbd> devuelve el hueso a su sitio.</p></div>
+        </div>
+      </section>
+
+      <section id="p3">
+        <div class="step">
+          <div class="step-head"><span class="n">3</span><h3>IK en las piernas</h3></div>
+          <ol>
+            <li>Pose Mode → selecciona <code>espinilla.L</code> → <em>Bone Constraints</em> → <strong>Inverse Kinematics</strong>.</li>
+            <li>Target: el armature, Bone: <code>pie_ik.L</code>. Pole Target: el armature, Bone: <code>polo.L</code>. <strong>Chain Length: 2</strong> (espinilla y muslo).</li>
+            <li>Si la rodilla gira hacia un lado, ajusta <strong>Pole Angle</strong>: −90° suele ser el bueno.</li>
+            <li>En <code>pie.L</code>: constraint <strong>Copy Rotation</strong> del <code>pie_ik.L</code>, para que el pie se quede plano en el suelo.</li>
+            <li>Mueve <code>pie_ik.L</code> con <kbd>G</kbd>: la pierna se dobla sola.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="p4">
+        <div class="step">
+          <div class="step-head"><span class="n">4</span><h3>Las 4 poses clave</h3></div>
+          <div class="poses">
+            <figure><img src="../assets/img/l12_contacto.webp" alt="Pose de contacto" loading="lazy"><figcaption><strong>Contacto</strong> (f1): talón delante, zancada máxima.</figcaption></figure>
+            <figure><img src="../assets/img/l12_bajada.webp" alt="Pose de bajada" loading="lazy"><figcaption><strong>Bajada</strong> (f4): el peso cae, la cadera en su punto más bajo.</figcaption></figure>
+            <figure><img src="../assets/img/l12_paso.webp" alt="Pose de paso" loading="lazy"><figcaption><strong>Paso</strong> (f7): la otra pierna pasa por debajo.</figcaption></figure>
+            <figure><img src="../assets/img/l12_subida.webp" alt="Pose de subida" loading="lazy"><figcaption><strong>Subida</strong> (f10): empuje, la cadera en su punto más alto.</figcaption></figure>
+          </div>
+          <p>Todo ciclo de caminar se construye con estas cuatro poses, repetidas para cada pierna: <strong>contacto → bajada → paso → subida</strong>, y otra vez contacto con la pierna contraria (f13). Con 24 fotogramas por ciclo, a 24 fps, el robot da 2 pasos por segundo.</p>
+        </div>
+      </section>
+
+      <section id="p5">
+        <div class="step">
+          <div class="step-head"><span class="n">5</span><h3>Animar y hacer bucle</h3></div>
+          <ol>
+            <li>En la línea de tiempo: Start 1, End 24.</li>
+            <li>Fotograma 1: coloca <code>pie_ik.L</code> delante y <code>pie_ik.R</code> detrás, apoyados. Selecciónalos, pulsa <kbd>I</kbd> → <strong>Location</strong>.</li>
+            <li>Fotograma 13: al revés. Fotograma 7: el pie izquierdo apoyado bajo el cuerpo y el derecho <strong>levantado</strong> pasando por debajo. Fotograma 19: lo contrario. <kbd>I</kbd> en cada uno.</li>
+            <li>Fotograma 25: copia la pose del 1 (en el Dope Sheet, duplica la clave con <kbd>Shift</kbd>+<kbd>D</kbd>).</li>
+            <li><strong>Graph Editor</strong> → selecciona todas las curvas → <code>Channel → Extrapolation Mode → Make Cyclic</code>. La animación se repite sin fin.</li>
+          </ol>
+          <div class="note why"><p><strong>Los pies no deben resbalar:</strong> mientras un pie está en el suelo (de f1 a f13 el izquierdo), tiene que ir hacia atrás a velocidad constante. En el Graph Editor, esa parte de la curva debe ser una <em>recta</em>. Si es una curva, el pie patina.</p></div>
+        </div>
+      </section>
+
+      <section id="p6">
+        <div class="step">
+          <div class="step-head"><span class="n">6</span><h3>Brazos, cadera y torso: la vida</h3></div>
+          <ul>
+            <li><strong>Cadera:</strong> baja 3–4 cm en las bajadas (f4 y f16) y sube 2 cm en las subidas (f10 y f22). Es lo que da peso.</li>
+            <li><strong>Brazos:</strong> se balancean al contrario que las piernas. Pierna izquierda delante, brazo izquierdo atrás (±18°).</li>
+            <li><strong>Torso:</strong> un leve giro (±4°) siguiendo los hombros.</li>
+          </ul>
+          <div class="note tip"><p><strong>Un robot puede ser «robótico»:</strong> menos balanceo de brazos y pasos más cortos y secos (interpolación <em>Linear</em> o <em>Constant</em>) dan un caminar mecánico. Más balanceo y curvas suaves, uno más humano. Es una decisión de personaje.</p></div>
+        </div>
+      </section>
+
+      <section id="p7">
+        <div class="step">
+          <div class="step-head"><span class="n">7</span><h3>Renderizar el vídeo</h3></div>
+          <ol>
+            <li><em>Output Properties</em> → <strong>File Format: FFmpeg Video</strong>, Container <strong>MPEG-4</strong>, códec H.264. Es gratis y está integrado en Blender.</li>
+            <li>Frame Range 1–96 (4 ciclos) y Frame Rate 24.</li>
+            <li><code>Render → Render Animation</code> (<kbd>Ctrl</kbd>+<kbd>F12</kbd>). Con EEVEE tardará minutos, no horas.</li>
+          </ol>
+          <div class="dl">
+            <span class="ico">📦</span>
+            <div><strong>androide_caminar.blend</strong><small>El androide con el rig completo (IK, polos, Copy Rotation) y el ciclo de 24 fotogramas en bucle. Pulsa <kbd>Espacio</kbd> para verlo.</small></div>
+            <a class="btn small ghost" href="../assets/blend/androide_caminar.blend" download>Descargar</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="reto">
+        <h2>Reto: dale tu forma de andar <span class="tag">// checklist</span></h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-id="rig"><span>Esqueleto con nombres .L/.R y Symmetrize</span></label></li>
+          <li><label><input type="checkbox" data-id="parent"><span>Todas las piezas emparentadas con su hueso</span></label></li>
+          <li><label><input type="checkbox" data-id="ik"><span>IK con polo: la rodilla se dobla hacia delante</span></label></li>
+          <li><label><input type="checkbox" data-id="poses"><span>Las 4 poses clave en ambas piernas</span></label></li>
+          <li><label><input type="checkbox" data-id="ciclo"><span>Bucle perfecto con Make Cyclic</span></label></li>
+          <li><label><input type="checkbox" data-id="patinar"><span>Los pies no patinan</span></label></li>
+          <li><label><input type="checkbox" data-id="vida"><span>Cadera, brazos y torso animados</span></label></li>
+          <li><label><input type="checkbox" data-id="video"><span>Vídeo MP4 renderizado</span></label></li>
+        </ul>
+        <p class="progress-line" data-progreso></p>
+      </section>
+
+      <nav class="pager" data-pager></nav>
+    </main>
+  </div>
+
+  <footer><div class="wrap"><span>FORJA<span style="color:var(--red)">//</span>MECHA</span><a href="../index.html#ruta">Volver a la ruta</a></div></footer>
+  <script type="module" src="../assets/js/forja.js"></script>
+  <script>
+    const anim = document.getElementById("anim");
+    const ctrl = document.getElementById("ctrl");
+    const btns = ctrl.querySelectorAll("button");
+    // arranca en marcha salvo que el usuario prefiera menos movimiento
+    const quieto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function poner(v) {
+      anim.classList.toggle("pausa", v === "pausa");
+      anim.style.setProperty("--dur", v === "lento" ? "3s" : "1s");
+      btns.forEach(b => b.classList.toggle("on", b.dataset.v === v));
+    }
+    poner(quieto ? "pausa" : "normal");
+    ctrl.addEventListener("click", e => { const b = e.target.closest("button"); if (b) poner(b.dataset.v); });
+  </script>
+</body>
+</html>
